@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Iterable
 from itertools import zip_longest
 
 INPUTS = [
@@ -17,7 +17,7 @@ INPUTS = [
 
 # Adapted from:
 #   https://docs.python.org/3/library/itertools.html#itertools-recipes
-def grouper(iterable):
+def grouper(iterable) -> Iterable:
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
     args = [iter(iterable)] * 4
     return zip_longest(*args)
@@ -44,10 +44,11 @@ def run_ops(inputs: List[int]) -> None:
 
 def main() -> None:
     """Processes inputs."""
-    # with open('input', 'r') as f:
-    #     run_ops([int(x) for x in f.read().split(',')])
-    for i in INPUTS:
-        run_ops(i)
+    print(':19690720')
+    with open('input', 'r') as f:
+        run_ops([int(x) for x in f.read().split(',')])
+    # for i in INPUTS:
+    #     run_ops(i)
 
 
 if __name__ == '__main__':
