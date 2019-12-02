@@ -32,19 +32,20 @@ def run_ops(inputs: List[int]) -> None:
 
     """
     for op, x, y, dest in grouper(inputs):
-        if op == 99:
+        if op == 1:
+            inputs[dest] = inputs[x] + inputs[y]
+        elif op == 2:
+            inputs[dest] = inputs[x] * inputs[y]
+        else: # op == 99:
             print(inputs)
             return
-        elif op == 1:
-            inputs[dest] = inputs[x] + inputs[y]
-        else:
-            inputs[dest] = inputs[x] * inputs[y]
+
+    print('Warning: opcode 99 was not detected.')
     print(inputs)
 
 
 def main() -> None:
     """Processes inputs."""
-    print(':19690720')
     with open('input', 'r') as f:
         run_ops([int(x) for x in f.read().split(',')])
     # for i in INPUTS:
