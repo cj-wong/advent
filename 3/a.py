@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, List, Set, Tuple
 
 
 INPUTS = [
@@ -12,6 +12,8 @@ INPUTS = [
         ('U98','R91','D20','R16','D67','R40','U7','R15','U6','R7')
         ]
     ]
+
+INTERSECTINGSET = Set[Tuple[int, int]]
 
 
 def insert_nums(
@@ -31,43 +33,59 @@ def insert_nums(
     offset = 1 if rows > 0 else -1
     for i in range(coord[index], coord[index] + rows, offset):
         if index == 0:
-            m[(i + offset, coord[1])] += 1
+            m[(i + offset, coord[1])] = 1
         else:
-            m[(coord[0], i + offset)] += 1
+            m[(coord[0], i + offset)] = 1
     coord[index] += rows
 
 
-def generate_map(inputs: List[Tuple[str]]) -> Dict[Tuple[int, int], int]:
-    """Creates a map representing `inputs` directions.
+def generate_intersections(inputs: List[Tuple[str]]) -> INTERSECTINGSET:
+    """Creates a map representing intersections after
+    `inputs` directions.
 
     Args:
         inputs (list): two or more sets of directions
 
     Returns:
-        dict: of all intersections (v > 1)
+        dict: of all intersections
 
     """
-    # 'o' will represent the origin.
+    sets = []
+    for it in inputs:
+        sets.append(generate_map(it))
+        
+    return sets[0] & sets[1]
+
+
+def generate_map(it: Iterable[str]) -> INTERSECTINGSET:
+    """Creates a single map based on one set of instructions.
+
+    Args:
+        it (Iterable): the iterable containing instructions
+
+    Returns:
+        set: of the directions in coordinate form in place
+
+    """
     m = defaultdict(int)
-    m[(0, 0)] = 1
+    coord = [0, 0]
 
-    for bbb, it in enumerate(inputs):
-        coord = [0, 0]
-        for step in enumerate(it):
-            direction = step[0]
-            delta = int(step[1:])
-            if direction == 'U':
-                insert_nums(m, coord, delta, 1)
-            elif direction == 'D':
-                insert_nums(m, coord, -delta, 1)
-            elif direction == 'L':
-                insert_nums(m, coord, -delta, 0)
-            else:
-                insert_nums(m, coord, delta, 0)
-    return {co: v for co, v in m.items() if v > 1}
+    for step in it:
+        direction = step[0]
+        delta = int(step[1:])
+        if direction == 'U':
+            insert_nums(m, coord, delta, 1)
+        elif direction == 'D':
+            insert_nums(m, coord, -delta, 1)
+        elif direction == 'L':
+            insert_nums(m, coord, -delta, 0)
+        else:
+            insert_nums(m, coord, delta, 0)
+
+    return set(m.keys())
 
 
-def find_shortest(intersections: Dict[Tuple[int, int], int]) -> None:
+def find_shortest(intersections: INTERSECTINGSET) -> None:
     """Find the shortest distance intersection to origin.
 
     Args:
@@ -79,12 +97,12 @@ def find_shortest(intersections: Dict[Tuple[int, int], int]) -> None:
 
 def main() -> None:
     """Processes inputs."""
-    # with open('input', 'r') as f:
-    #     i = [t.split(',') for t in f.read().strip().split('\n')]
-    # find_shortest(generate_map(i))
+    with open('input', 'r') as f:
+        i = [t.split(',') for t in f.read().strip().split('\n')]
+    find_shortest(generate_intersections(i))
 
-    for i in INPUTS:
-        find_shortest(generate_map(i))
+    # for i in INPUTS:
+    #     find_shortest(generate_maps(i))
 
 
 if __name__ == '__main__':
