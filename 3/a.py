@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 
 INPUTS = [
@@ -14,76 +14,77 @@ INPUTS = [
     ]
 
 
-def insert_verticals(
-    m: List[defaultdict], coord: List[int], rows: int
+def insert_nums(
+    m: defaultdict, coord: List[int], rows: int, index: int
     ) -> None:
-    """Inserts vertical lines horizontally.
+    """Insert nums into `m`. If `is_x`, insert horizontally. Else,
+    insert vertically.
 
     Args:
-        m (list): the map in progress
+        m (defaultdict): the coordinate system
         coord (list): the current coordinates
-        min_c (list): the top-right most part coordinate
-        max_c (list): the bottom-left most part coordinate
-        rows (int): can be positive (U) or negative (D); represents
-            how many rows will be filled
-    
+        rows (int): can be positive or negative; how many rows (y-axis)
+            to add
+        index (int): indicates which index to modify; 0 = x-axis, 1 = y-axis
+
     """
-    low = 1 if rows > 0 else -1
-    for i in range(low, rows + low):
-        try:
-            row = m[coord[1] + i]
-            row[coord[1]] += 1
-        except IndexError:
-            m[coord[1] + i] = defaultdict(int)
-            row = m[coord[1] + i]
-            row[coord[1]] += 1
+    offset = 1 if rows > 0 else -1
+    for i in range(coord[index], coord[index] + rows, offset):
+        if index == 0:
+            m[(i + offset, coord[1])] += 1
+        else:
+            m[(coord[0], i + offset)] += 1
+    coord[index] += rows
 
 
-
-def generate_map(inputs: List[Tuple[str]]) -> None:
-    """Creates an ASCII map given directions.
+def generate_map(inputs: List[Tuple[str]]) -> Dict[Tuple[int, int], int]:
+    """Creates a map representing `inputs` directions.
 
     Args:
         inputs (list): two or more sets of directions
 
+    Returns:
+        dict: of all intersections (v > 1)
+
     """
     # 'o' will represent the origin.
-    m = {0: defaultdict(int)}
-    m[0][0] = 42
-    coord = [0, 0]
-    # min_c = [0, 0]
-    # max_c = [0, 0]
+    m = defaultdict(int)
+    m[(0, 0)] = 1
 
-    for tup in inputs:
-        for step in tup:
-            print(step, coord, m[coord[1]])
+    for bbb, it in enumerate(inputs):
+        coord = [0, 0]
+        for step in enumerate(it):
             direction = step[0]
-            offset = int(step[1:])
+            delta = int(step[1:])
             if direction == 'U':
-                insert_verticals(m, coord, offset)
-                coord[1] += offset
-                # if coord[1] > max_c[1]:
-                #     max_c[1] = coord[1]
+                insert_nums(m, coord, delta, 1)
             elif direction == 'D':
-                insert_verticals(m, coord, -offset)
-                coord[1] -= offset
+                insert_nums(m, coord, -delta, 1)
             elif direction == 'L':
-                for x in range(offset):
-                    m[coord[1]][coord[0] - x] += 1
-                coord[0] -= offset
+                insert_nums(m, coord, -delta, 0)
             else:
-                for x in range(offset):
-                    m[coord[1]][coord[0] + x] += 1
-                coord[0] += offset
-    print(m)
+                insert_nums(m, coord, delta, 0)
+    return {co: v for co, v in m.items() if v > 1}
+
+
+def find_shortest(intersections: Dict[Tuple[int, int], int]) -> None:
+    """Find the shortest distance intersection to origin.
+
+    Args:
+        intersections (dict): the mapping of intersecting inputs
+
+    """
+    print(min([sum([abs(x), abs(y)]) for x, y in intersections]))
 
 
 def main() -> None:
     """Processes inputs."""
     # with open('input', 'r') as f:
-    #     run_ops([int(x) for x in f.read().split(',')])
+    #     i = [t.split(',') for t in f.read().strip().split('\n')]
+    # find_shortest(generate_map(i))
+
     for i in INPUTS:
-        generate_map(i)
+        find_shortest(generate_map(i))
 
 
 if __name__ == '__main__':
