@@ -48,6 +48,7 @@ def has_adjacent_digits(digits: List[int]) -> bool:
 
 
 def iterate_range() -> None:
+    """Iterate from `low` to `high` to find the number of valid codes."""
     valids = []
     for i in range(low, high + 1):
         l = [int(x) for x in str(i)]

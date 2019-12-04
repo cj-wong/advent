@@ -47,12 +47,20 @@ def has_adjacent_digits(digits: List[int]) -> bool:
         elif digit == last:
             adj += 1
             if adj > 1:
+                # Because the length of the code is only 6,
+                # an "invalid" code will always be 3+, which
+                # leaves only one possible pair if at all.
+                # Furthermore, e.g. 111211 is not valid anyway,
+                # so we can safely ignore 1.
                 ignored.append(digit)
                 adj = 0
         else:
             if adj > 0:
                 return True
             last = digit
+
+    # For cases where two consecutive digits are at the end,
+    # flush the result. (adj == 1)
     if adj > 0:
         return True
     else:
@@ -60,6 +68,7 @@ def has_adjacent_digits(digits: List[int]) -> bool:
 
 
 def iterate_range() -> None:
+    """Iterate from `low` to `high` to find the number of valid codes."""
     valids = []
     for i in range(low, high + 1):
         l = [int(x) for x in str(i)]
