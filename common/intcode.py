@@ -80,6 +80,7 @@ class Interpreter:
 
         """
         self.ops = [int(op) for op in ops]
+        self.inputs = 0
 
     def save_state(self) -> None:
         """Save current state, to restore later."""
@@ -88,6 +89,9 @@ class Interpreter:
     def restore_state(self) -> None:
         """Restore a copy of state."""
         self.ops = copy(self.state)
+
+    def store_phases(self, phase: int, previous: int) -> None:
+        self.phases = [phase, previous]
 
     def store_input(self, index: int, value: int = None) -> None:
         """Store an integer from stdin into index `index`.
@@ -98,7 +102,15 @@ class Interpreter:
                 defaults to 0
 
         """
-        self.ops[index] = int(sys.argv[1]) if value is None else value
+        self.inputs += 1
+        if value is None:
+            try:
+                self.ops[index] = int(sys.argv[1])
+            except IndexError:
+                self.ops[index] = self.phases[0]
+                self.phases = self.phases[1:]
+        else:
+            self.ops[index] = value
 
     def run_ops(self, *, jump: int = 0, silent: bool = False) -> None:
         """Runs the operations `self.ops`.
@@ -142,16 +154,17 @@ class Interpreter:
                 elif len(operator.params) == 1:
                     dest = self.ops[dest]
                 if operator.run([z]):
-                    return self.run_ops(dest)
+                    return self.run_ops(jump=dest)
             elif operator.code == 3:
                 self.store_input(self.ops[jump_args])
             else: # operator.code == 4
+                args = (
+                    args[0]
+                    if operator.params
+                    else self.ops[self.ops[jump_args]]
+                    )
+                self.previous = args
                 if not silent:
-                    print(
-                        'opcode 4:',
-                        args[0]
-                        if operator.params
-                        else self.ops[self.ops[jump_args]]
-                        )
+                    print('opcode 4:', args)
 
             jump = jump_next
