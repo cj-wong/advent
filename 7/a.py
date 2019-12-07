@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import List
 
 import intcode
 
@@ -30,55 +31,58 @@ INPUTS = [
     ]
 
 
-def main() -> None:
-    """Processes inputs."""
-    # for phases, ops in INPUTS:
-    #     interpreter = intcode.Interpreter(ops)
-    #     interpreter.save_state()
-    #     signal = 0
-    #     for phase in phases:
-    #         interpreter.store_phases(phase, signal)
-    #         interpreter.run_ops(silent=True)
-    #         signal = interpreter.signal
-    #         interpreter.restore_state()
-    #     print(signal)
+def iterate(ops: List[int], phases: List[int] = None) -> None:
+    """Iterate through operators `ops`.
+
+    Args:
+        ops (List[int]): list of operators/operands
+        phases (List[int], optional): a specific phase setting to try;
+            defaults to None; if not defined, iterate will try every
+            possible combination defined by PHASE_MIN and PHASE_MAX
+
+    """
+    interpreter = intcode.Interpreter(ops)
+    interpreter.save_state()
+    signal = 0
+    if phases:
+        for phase in phases:
+            interpreter.store_phases(phase, signal)
+            interpreter.run_ops(silent=True)
+            signal = interpreter.signal
+        print(interpreter.signal)
+        return
+
     signals = defaultdict(int)
-    with open('input', 'r') as f:
-        interpreter = intcode.Interpreter(
-            f.read().strip().split(',')
-            )
-        interpreter.save_state()
-
-    all_phases = [
-        (a, b, c, d, e)
-        for a in range(0, PHASE_MAX)
-        for b in range(0, PHASE_MAX)
-        for c in range(0, PHASE_MAX)
-        for d in range(0, PHASE_MAX)
-        for e in range(0, PHASE_MAX)
-        ]
-
-    for a in range(0, PHASE_MAX):
-        for b in range(0, PHASE_MAX):
-            if b == a:
+    for a in range(PHASE_MIN, PHASE_MAX):
+        for b in range(PHASE_MIN, PHASE_MAX):
+            if b in [a]:
                 continue
-            for c in range(0, PHASE_MAX):
+            for c in range(PHASE_MIN, PHASE_MAX):
                 if c in [a, b]:
                     continue
-                for d in range(0, PHASE_MAX):
+                for d in range(PHASE_MIN, PHASE_MAX):
                     if d in [a, b, c]:
                         continue
-                    for e in range(0, PHASE_MAX):
+                    for e in range(PHASE_MIN, PHASE_MAX):
                         if e in [a, b, c, d]:
                             continue
-                        signal = 0
                         for phase in [a, b, c, d, e]:
                             interpreter.store_phases(phase, signal)
                             interpreter.run_ops(silent=True)
                             signal = interpreter.signal
                             interpreter.restore_state()
                         signals[(a, b, c, d, e)] = signal
-    print(max(signals.values()))
+                        signal = 0
+
+
+def main() -> None:
+    """Processes inputs."""
+    for phases, ops in INPUTS:
+        iterate(ops, phases)
+
+    # with open('input', 'r') as f:
+    #     iterate(f.read().strip().split(','))
+
 
 if __name__ == '__main__':
     main()
