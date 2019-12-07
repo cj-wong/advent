@@ -1,3 +1,7 @@
+"""Because parts a and b share almost the entire same constraints,
+this file c.py represents a completion for the day in one file.
+
+"""
 import sys
 from typing import List, Iterable
 from itertools import zip_longest
@@ -18,22 +22,13 @@ INPUTS = [
     [1, 1, 1, 4, 99, 5, 6, 0, 99]
     ]
 
-STATE = [
-    (1, 12),
-    (2, 2)
-    ]
-
 
 def main() -> None:
     """Processes inputs."""
+    with open('input', 'r') as f:
+        intcode.Interpreter(f.read().split(',')).run_ops()
     # for i in INPUTS:
     #     intcode.Interpreter(i).run_ops()
-    with open('input', 'r') as f:
-        interpreter = intcode.Interpreter(f.read().split(','))
-        for index, value in STATE:
-            interpreter.store_input(index, value)
-        interpreter.run_ops(silent=True)
-        print(interpreter.ops[0])
 
 
 if __name__ == '__main__':

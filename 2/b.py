@@ -1,6 +1,9 @@
 from typing import List, Iterable
 from itertools import zip_longest
 
+import intcode
+
+
 INPUTS = [
     # Output: 3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50
     [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50],
@@ -14,58 +17,30 @@ INPUTS = [
     [1, 1, 1, 4, 99, 5, 6, 0, 99]
     ]
 
-
-# Adapted from:
-#   https://docs.python.org/3/library/itertools.html#itertools-recipes
-def grouper(iterable) -> Iterable:
-    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
-    args = [iter(iterable)] * 4
-    return zip_longest(*args)
-
-
-def run_ops(inputs: List[int]) -> List[int]:
-    """Runs the operations defined by `inputs`.
-    If `inputs` is not defined, `INPUTS` will be used.
-
-    Args:
-        inputs (list): containing op codes
-
-    Returns:
-        list: of final opcodes
-
-    """
-    for op, x, y, dest in grouper(inputs):
-        if op == 1:
-            inputs[dest] = inputs[x] + inputs[y]
-        elif op == 2:
-            inputs[dest] = inputs[x] * inputs[y]
-        else: # op == 99:
-            return inputs
-
-    print('Warning: opcode 99 was not detected.')
-    return inputs
+END = 19690720
 
 
 def main() -> None:
     """Processes inputs."""
-    with open('input', 'r') as f:
-        i = f.read()
-    bounds = len(i.split(','))
-    for x in range(bounds):
-        for y in range(bounds):
-            ops = [int(x) for x in i.split(',')]
-            ops[1] = x
-            ops[2] = y
-            out = run_ops(ops)
-            if out[0] == 19690720:
-                print(
-                    'Solution found: x = ', x,
-                    ', y = ', y,
-                    ', answer = ', 100 * x + y
-                    )
-                return
     # for i in INPUTS:
     #     run_ops(i)
+    with open('input', 'r') as f:
+        ops = f.read().split(',')
+    bounds = len(ops)
+    interpreter = intcode.Interpreter(ops)
+    interpreter.save_state()
+    for x in range(bounds):
+        for y in range(bounds):
+            for index, value in enumerate([x, y], start=1):
+                interpreter.store_input(index, value)
+            interpreter.run_ops(silent=True)
+            if interpreter.ops[0] == END:
+                print(
+                    f'Solution found: x = {x}, y = {y}, answer =',
+                    100 * x + y
+                    )
+                return
+            interpreter.restore_state()
 
 
 if __name__ == '__main__':
