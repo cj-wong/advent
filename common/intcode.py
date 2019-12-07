@@ -80,7 +80,6 @@ class Interpreter:
 
         """
         self.ops = [int(op) for op in ops]
-        self.inputs = 0
 
     def save_state(self) -> None:
         """Save current state, to restore later."""
@@ -90,8 +89,16 @@ class Interpreter:
         """Restore a copy of state."""
         self.ops = copy(self.state)
 
-    def store_phases(self, phase: int, previous: int) -> None:
-        self.phases = [phase, previous]
+    def store_phases(self, phase: int, signal: int) -> None:
+        """Store the phase inputs including signal phase output.
+
+        Args:
+            phase (int): the current phase setting
+            signal (int): the last phase output; if this is the first
+                iteration, it's 0
+
+        """
+        self.phases = [phase, signal]
 
     def store_input(self, index: int, value: int = None) -> None:
         """Store an integer from stdin into index `index`.
@@ -102,7 +109,6 @@ class Interpreter:
                 defaults to 0
 
         """
-        self.inputs += 1
         if value is None:
             try:
                 self.ops[index] = int(sys.argv[1])
@@ -134,6 +140,7 @@ class Interpreter:
             jump_args = jump + 1
             args = self.ops[jump_args:jump_next]
 
+
             if operator.code in [1, 2, 7, 8]:
                 x, y, dest = args
                 if not operator.params:
@@ -154,17 +161,17 @@ class Interpreter:
                 elif len(operator.params) == 1:
                     dest = self.ops[dest]
                 if operator.run([z]):
-                    return self.run_ops(jump=dest)
+                    jump = dest
+                    continue
             elif operator.code == 3:
                 self.store_input(self.ops[jump_args])
             else: # operator.code == 4
-                args = (
+                self.signal = (
                     args[0]
                     if operator.params
                     else self.ops[self.ops[jump_args]]
                     )
-                self.previous = args
                 if not silent:
-                    print('opcode 4:', args)
+                    print('opcode 4:', self.signal)
 
             jump = jump_next
