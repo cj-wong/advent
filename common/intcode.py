@@ -3,6 +3,10 @@ from copy import copy
 from typing import Any, Dict, Callable, List
 
 
+class NoSignalError(ValueError):
+    """No signal detected."""
+    pass
+
 
 class Operator:
     """An Intcode operator with potential parameters.
@@ -72,7 +76,7 @@ class Interpreter:
 
     stop = 99
 
-    def __init__(self, ops: str) -> None:
+    def __init__(self, ops: str, silent: bool) -> None:
         """Initialize queued operations.
 
         Args:
@@ -80,25 +84,7 @@ class Interpreter:
 
         """
         self.ops = [int(op) for op in ops]
-
-    def save_state(self) -> None:
-        """Save current state, to restore later."""
-        self.state = copy(self.ops)
-
-    def restore_state(self) -> None:
-        """Restore a copy of state."""
-        self.ops = copy(self.state)
-
-    def store_phases(self, phase: int, signal: int) -> None:
-        """Store the phase inputs including signal phase output.
-
-        Args:
-            phase (int): the current phase setting
-            signal (int): the last phase output; if this is the first
-                iteration, it's 0
-
-        """
-        self.phases = [phase, signal]
+        self.silent = silent
 
     def store_input(self, index: int, value: int = None) -> None:
         """Store an integer from stdin into index `index`.
@@ -110,34 +96,33 @@ class Interpreter:
 
         """
         if value is None:
-            try:
-                self.ops[index] = int(sys.argv[1])
-            except IndexError:
-                self.ops[index] = self.phases[0]
-                self.phases = self.phases[1:]
+            self.ops[index] = int(sys.argv[1])
         else:
             self.ops[index] = value
 
-    def run_ops(self, *, jump: int = 0, silent: bool = False) -> None:
-        """Runs the operations `self.ops`.
+    def print_at(self, index: int) -> None:
+        """Print a stored operator/operand at index `index`.
 
         Args:
-            jump (int, optional): the starting position to run onward;
-                defaults to 0
-            silent (bool, optional): whether to suppress stdout;
-                defaults to False
+            index (int): the index of the operator
 
         """
+        if not self.silent:
+            print('opcode 4:', self.ops[index])
+
+    def run_ops(self) -> None:
+        """Runs the operations `self.ops`."""
         while True:
-            operator = Operator(self.ops[jump])
+            print(self.jump, self.ops[self.jump])
+            operator = Operator(self.ops[self.jump])
 
             if operator.code == 99:
                 if not silent:
                     print('opcode 99:', self.ops)
                 return
 
-            jump_next = jump + self.jumps[operator.code]
-            jump_args = jump + 1
+            jump_next = self.jump + self.jumps[operator.code]
+            jump_args = self.jump + 1
             args = self.ops[jump_args:jump_next]
 
 
@@ -161,17 +146,145 @@ class Interpreter:
                 elif len(operator.params) == 1:
                     dest = self.ops[dest]
                 if operator.run([z]):
-                    jump = dest
+                    self.jump = dest
                     continue
             elif operator.code == 3:
                 self.store_input(self.ops[jump_args])
             else: # operator.code == 4
-                self.signal = (
+                self.print_at(
                     args[0]
                     if operator.params
                     else self.ops[self.ops[jump_args]]
                     )
-                if not silent:
-                    print('opcode 4:', self.signal)
 
-            jump = jump_next
+            self.jump = jump_next
+
+
+class Amplifier(Interpreter):
+    """Represents an amplifier, a specific Intcode interpreter."""
+
+    def __init__(
+        self, ops: str, phase: int, silent: bool
+        ) -> None:
+        """Initialize the amplifier with `phase`, defined in
+        the main file to be between PHASE_MIN and PHASE_MAX.
+
+        Args:
+            ops (str): Intcode operations
+            phase (int): the phase setting
+            silent (bool): whether to suppress prints
+
+        """
+        super().__init__(ops, silent=silent)
+        self.phase = phase
+        self.phase_counter = 0
+        self.signal_out = None
+        self.jump = 0
+
+    def init_signal(self) -> None:
+        """Initialize the signal. Should only be used by amplifier 'A'.
+        """
+        self.signal = 0
+
+    def load_signal(self, signal: int) -> None:
+        """Load a signal `signal` to use."""
+        self.signal = signal
+
+    def save_state(self) -> None:
+        """Save current state, to restore later."""
+        self.state = copy(self.ops)
+
+    def restore_state(self) -> None:
+        """Restore a copy of state."""
+        self.ops = copy(self.state)
+
+    def print_at(self, index: int) -> None:
+        """Print a stored operator/operand at index `index`.
+        In this overridden method, `self.signal_out` is set.
+
+        Args:
+            index (int): the index of the operator
+
+        """
+        print('index', index)
+        self.signal_out = self.ops[index]
+        super().print_at(index)
+
+    def store_input(self, index: int) -> None:
+        """Store an integer from stdin into index `index`.
+        In this overridden method, `sys.argv` is absent. Phases
+        are used instead.
+
+        Args:
+            index (int): where the stdin input goes
+
+        Raises:
+            NoSignalError: if no signal was found
+
+        """
+        if self.phase_counter % 2 == 0:
+            self.ops[index] = self.phase
+        elif self.signal is not None:
+            self.ops[index] = self.signal
+            self.signal = None
+        else:
+            raise NoSignalError
+
+        self.phase_counter += 1
+
+    def resume(self, signal: int) -> None:
+        """Resume amplifier operations.
+
+        Args:
+            signal (int): resume using a signal from the previous
+                amplifier; E -> A, A -> B, etc.
+
+        """
+        self.signal = signal
+        self.signal_out = None
+        self.run_ops()
+
+
+class AmplifierCluster:
+    """A cluster of amplifiers. Currently, they go up from A to E."""
+    names = ['A', 'B', 'C', 'D', 'E']
+
+    def __init__(
+        self, ops: List[int], phases: List[int], silent: bool = True
+        ) -> None:
+        """Initialize the clusters.
+
+        Args:
+            ops (List[int]): Intcode operations
+            phases (List[int]): phase settings corresponding to
+                each amplifier
+            silent (bool, optional): whether to suppress prints;
+                defaults to True
+
+        """
+        self.amplifiers = {
+            name: Amplifier(ops, phase, silent)
+            for name, phase
+            in zip(self.names, phases)
+            }
+        self.signals = []
+        self.amplifiers['A'].init_signal()
+
+    def run(self):
+        """Run the cluster in sequence."""
+        while True:
+            for i, (name, amplifier) in enumerate(self.amplifiers.items()):
+                print('i', i)
+                try:
+                    if not self.signals:
+                        amplifier.run_ops()
+                    else:
+                        signal = self.signals[0]
+                        self.signals = self.signals[1:]
+                        amplifier.resume(signal)
+                except NoSignalError:
+                    self.signals.append(amplifier.signal_out)
+                    print(self.signals)
+                except IndexError:
+                    print(amplifier.ops)
+
