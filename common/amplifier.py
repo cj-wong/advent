@@ -29,15 +29,6 @@ class Amplifier(intcode.Interpreter):
         self.signal_out = None
         self.jump = 0
 
-    def init_signal(self) -> None:
-        """Initialize the signal. Should only be used by amplifier 'A'.
-        """
-        self.signal = 0
-
-    def load_signal(self, signal: int) -> None:
-        """Load a signal `signal` to use."""
-        self.signal = signal
-
     def save_state(self) -> None:
         """Save current state, to restore later."""
         self.state = copy(self.ops)
@@ -91,7 +82,8 @@ class Amplifier(intcode.Interpreter):
         self.phase_counter += 1
 
     def resume(self, signal: int) -> None:
-        """Resume amplifier operations.
+        """Resume amplifier operations. On the first iteration,
+        this is functionally the same as `self.run_ops()`.
 
         Args:
             signal (int): resume using a signal from the previous
@@ -103,14 +95,22 @@ class Amplifier(intcode.Interpreter):
         self.run_ops()
 
 
-class Cluster:
-    """A cluster of amplifiers. Currently, they go up from A to E."""
+class Controller:
+    """A controller of amplifiers. Currently, they go up from A to E.
+
+    Attributes:
+        names (List[str]): names (letters) of each amplifier
+        amplifiers (Dict[str, Amplifier]): amplifiers by name (key)
+        signals (List[int]): a list containing signals; these should never
+            exceed len 2
+
+    """
     names = ['A', 'B', 'C', 'D', 'E']
 
     def __init__(
         self, ops: List[int], phases: List[int], silent: bool = True
         ) -> None:
-        """Initialize the clusters.
+        """Initialize the controller with amplifiers.
 
         Args:
             ops (List[int]): Intcode operations
@@ -126,10 +126,9 @@ class Cluster:
             in zip(self.names, phases)
             }
         self.signals = []
-        #self.amplifiers['A'].init_signal()
 
     def run(self) -> int:
-        """Run the cluster in sequence.
+        """Run the controller in sequence.
 
         Returns:
             int: the final signal of amplifier 'E'
@@ -147,6 +146,12 @@ class Cluster:
 
                     if name == 'E':
                         return amplifier.signal_out
+
                 except NoSignalError:
+                    # Because NoSignalError is thrown when an amplifier
+                    # runs out of signal input and we need to retrieve
+                    # its `signal_out` regardless if NoSignalError is
+                    # thrown, just pass.
                     pass
+
                 self.signals.append(amplifier.signal_out)

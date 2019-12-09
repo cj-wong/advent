@@ -39,10 +39,9 @@ def iterate(ops: List[int], phases: List[int] = None) -> None:
             possible combination defined by PHASE_MIN and PHASE_MAX
 
     """
-    signal = 0
     if phases:
-        interpreter = amplifier.Cluster(ops, phases)
-        interpreter.run()
+        interpreter = amplifier.Controller(ops, phases)
+        print(interpreter.run())
         return
 
     signals = defaultdict(int)
@@ -59,16 +58,16 @@ def iterate(ops: List[int], phases: List[int] = None) -> None:
                     for e in range(PHASE_MIN, PHASE_MAX):
                         if e in [a, b, c, d]:
                             continue
-                        interpreter = amplifier.Cluster(
+                        interpreter = amplifier.Controller(
                             ops, [a, b, c, d, e]
                             )
                         signals[(a, b, c, d, e)] = interpreter.run()
 
-    print(max(signals.values()))
+    print('Maximum signal:', max(signals.values()))
 
 
 def main() -> None:
-    """Processes inputs."""
+    # """Processes inputs."""
     # for phases, ops in INPUTS:
     #     iterate(ops, phases)
 

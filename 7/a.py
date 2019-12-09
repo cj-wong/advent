@@ -1,9 +1,10 @@
 from collections import defaultdict
 from typing import List
 
-import intcode
+import amplifier
 
 
+PHASE_MIN = 0
 PHASE_MAX = 4 + 1 # 0 <= phase <= 4
 
 INPUTS = [
@@ -41,15 +42,9 @@ def iterate(ops: List[int], phases: List[int] = None) -> None:
             possible combination defined by PHASE_MIN and PHASE_MAX
 
     """
-    interpreter = intcode.Interpreter(ops)
-    interpreter.save_state()
-    signal = 0
     if phases:
-        for phase in phases:
-            interpreter.store_phases(phase, signal)
-            interpreter.run_ops(silent=True)
-            signal = interpreter.signal
-        print(interpreter.signal)
+        interpreter = amplifier.Controller(ops, phases)
+        print(interpreter.run())
         return
 
     signals = defaultdict(int)
@@ -66,22 +61,21 @@ def iterate(ops: List[int], phases: List[int] = None) -> None:
                     for e in range(PHASE_MIN, PHASE_MAX):
                         if e in [a, b, c, d]:
                             continue
-                        for phase in [a, b, c, d, e]:
-                            interpreter.store_phases(phase, signal)
-                            interpreter.run_ops(silent=True)
-                            signal = interpreter.signal
-                            interpreter.restore_state()
-                        signals[(a, b, c, d, e)] = signal
-                        signal = 0
+                        interpreter = amplifier.Controller(
+                            ops, [a, b, c, d, e]
+                            )
+                        signals[(a, b, c, d, e)] = interpreter.run()
+
+    print('Maximum signal:', max(signals.values()))
 
 
 def main() -> None:
     """Processes inputs."""
-    for phases, ops in INPUTS:
-        iterate(ops, phases)
+    # for phases, ops in INPUTS:
+    #     iterate(ops, phases)
 
-    # with open('input', 'r') as f:
-    #     iterate(f.read().strip().split(','))
+    with open('input', 'r') as f:
+        iterate(f.read().strip().split(','))
 
 
 if __name__ == '__main__':
