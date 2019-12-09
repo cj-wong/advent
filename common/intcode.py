@@ -1,6 +1,21 @@
 import sys
+from collections import defaultdict
 from copy import copy
 from typing import Any, Dict, Callable, List
+
+
+
+JUMPS = {
+    1: 4,
+    2: 4,
+    3: 2,
+    4: 2,
+    5: 3,
+    6: 3,
+    7: 4,
+    8: 4,
+    9: 2,
+    }
 
 
 class NoSignalError(ValueError):
@@ -27,6 +42,12 @@ class Operator:
         8: lambda x, y: 1 if x == y else 0,
         }
 
+    nparams = {
+        code: jump - 1
+        for code, jump
+        in JUMPS.items()
+        }
+
     def __init__(self, op: int) -> None:
         """Initialize operator data, and then call for parameters."""
         self.code = op
@@ -43,6 +64,8 @@ class Operator:
         else:
             self.params = [int(p) for p in str(self.code//100)]
             self.code %= 100
+            while len(self.params) < self.nparams[self.code]:
+                self.params.insert(0, 0)
 
     def run(self, args: List[int]) -> int:
         """Runs an operation. Only [1, 2, 5, 6, 7, 8] are supported.
@@ -63,28 +86,36 @@ class Interpreter:
         stop (int): the stop operator; 99
 
     """
-    jumps = {
-        1: 4,
-        2: 4,
-        3: 2,
-        4: 2,
-        5: 3,
-        6: 3,
-        7: 4,
-        8: 4,
-        }
+    positional = [0, 2]
 
     stop = 99
 
-    def __init__(self, ops: str, silent: bool) -> None:
+    def __init__(self, ops: str, silent: bool = False) -> None:
         """Initialize queued operations.
 
         Args:
             ops (str): Intcode operations
+            silent (bool, optional): whether to suppress prints;
+                defaults to False
 
         """
-        self.ops = [int(op) for op in ops]
+        self.ops = defaultdict(
+            int,
+            {index: int(op) for index, op in enumerate(ops)}
+            )
         self.silent = silent
+        self.jump = 0
+        self.relative = 0
+
+    def slice(self, start: int, end: int) -> List[int]:
+        """Slices `self.ops` like how a list can be sliced.
+
+        Args:
+            start (int): the starting index
+            end (int): the terminating index
+
+        """
+        return [self.ops[i] for i in range(start, end)]
 
     def store_input(self, index: int, value: int = None) -> None:
         """Store an integer from stdin into index `index`.
@@ -100,6 +131,16 @@ class Interpreter:
         else:
             self.ops[index] = value
 
+    def print(self, n: int) -> None:
+        """Prints `n`. Used for operator 104.
+
+        Args:
+            n (int): the direct number to print
+
+        """
+        if not self.silent:
+            print('opcode 4:', n)
+
     def print_at(self, index: int) -> None:
         """Print a stored operator/operand at index `index`.
 
@@ -110,52 +151,86 @@ class Interpreter:
         if not self.silent:
             print('opcode 4:', self.ops[index])
 
+    def get(self, index: int, parameter: int) -> int:
+        """Determines the value at index `index` depending
+        on `parameter` (0 is literal, 2 is relative).
+
+        Args:
+            index (int): the index of operations; modified by parameter;
+                if parameter is 1, return this as a literal value,
+                not as an index
+            parameter (int): either 0 (literal) or 2 (relative)
+
+        """
+        if parameter == 1:
+            return index
+        return self.ops[index if parameter == 0 else self.relative + index]
+
     def run_ops(self) -> None:
         """Runs the operations `self.ops`."""
         while True:
-            print(self.jump, self.ops[self.jump])
             operator = Operator(self.ops[self.jump])
 
             if operator.code == 99:
-                if not silent:
-                    print('opcode 99:', self.ops)
+                if not self.silent:
+                    print('opcode 99:', self.ops.values())
                 return
 
-            jump_next = self.jump + self.jumps[operator.code]
+            jump_next = self.jump + JUMPS[operator.code]
             jump_args = self.jump + 1
-            args = self.ops[jump_args:jump_next]
-
+            args = self.slice(jump_args, jump_next)
 
             if operator.code in [1, 2, 7, 8]:
                 x, y, dest = args
                 if not operator.params:
                     x = self.ops[x]
                     y = self.ops[y]
-                elif len(operator.params) == 2 and operator.params[-1] == 0:
-                    x = self.ops[x]
-                elif len(operator.params) == 1:
-                    y = self.ops[y]
+                else:
+                    if operator.params[0] == 2:
+                        dest += self.relative
+                    y, x = [
+                        self.get(index, param)
+                        for index, param
+                        in zip([y, x], operator.params[1:])
+                        ]
                 self.ops[dest] = operator.run([x, y])
             elif operator.code in [5, 6]:
                 z, dest = args
                 if not operator.params:
                     z = self.ops[z]
                     dest = self.ops[dest]
-                elif len(operator.params) == 2 and operator.params[-1] == 0:
-                    z = self.ops[z]
-                elif len(operator.params) == 1:
-                    dest = self.ops[dest]
+                else:
+                    dest, z = [
+                        self.get(index, param)
+                        for index, param
+                        in zip([dest, z], operator.params)
+                        ]
                 if operator.run([z]):
                     self.jump = dest
                     continue
             elif operator.code == 3:
-                self.store_input(self.ops[jump_args])
-            else: # operator.code == 4
-                self.print_at(
-                    args[0]
-                    if operator.params
-                    else self.ops[self.ops[jump_args]]
-                    )
+                dest = args[0]
+                # In this case, the parameter must be 2; 1 is invalid
+                # for operator 3.
+                if operator.params:
+                    dest += self.relative
+                self.store_input(dest)
+            elif operator.code == 4:
+                z = args[0]
+                if not operator.params:
+                    self.print_at(z)
+                elif 2 in operator.params:
+                    self.print_at(self.relative + z)
+                else:
+                    self.print(z)
+            else: # operator.code == 9
+                z = args[0]
+                if operator.params:
+                    if 2 in operator.params:
+                        z = self.ops[self.relative + z]
+                elif not operator.params:
+                    z = self.ops[z]
+                self.relative += z
 
             self.jump = jump_next
 
@@ -198,6 +273,17 @@ class Amplifier(Interpreter):
         """Restore a copy of state."""
         self.ops = copy(self.state)
 
+    def print(self, n: int) -> None:
+        """Prints `n`. Used for operator 104.
+        In this overridden method, `self.signal_out` is set.
+
+        Args:
+            n (int): the direct number to print
+
+        """
+        self.signal_out = n
+        super().print_at(index)
+
     def print_at(self, index: int) -> None:
         """Print a stored operator/operand at index `index`.
         In this overridden method, `self.signal_out` is set.
@@ -206,7 +292,6 @@ class Amplifier(Interpreter):
             index (int): the index of the operator
 
         """
-        print('index', index)
         self.signal_out = self.ops[index]
         super().print_at(index)
 
