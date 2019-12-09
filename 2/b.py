@@ -23,17 +23,18 @@ END = 19690720
 def main() -> None:
     """Processes inputs."""
     # for i in INPUTS:
-    #     run_ops(i)
+    #     intcode.Interpreter(i).run_ops()
+
     with open('input', 'r') as f:
         ops = f.read().split(',')
     bounds = len(ops)
-    interpreter = intcode.Interpreter(ops)
+    interpreter = intcode.Interpreter(ops, silent=True)
     interpreter.save_state()
     for x in range(bounds):
         for y in range(bounds):
             for index, value in enumerate([x, y], start=1):
                 interpreter.store_input(index, value)
-            interpreter.run_ops(silent=True)
+            interpreter.run_ops()
             if interpreter.ops[0] == END:
                 print(
                     f'Solution found: x = {x}, y = {y}, answer =',

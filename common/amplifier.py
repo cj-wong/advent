@@ -29,14 +29,6 @@ class Amplifier(intcode.Interpreter):
         self.signal_out = None
         self.jump = 0
 
-    def save_state(self) -> None:
-        """Save current state, to restore later."""
-        self.state = copy(self.ops)
-
-    def restore_state(self) -> None:
-        """Restore a copy of state."""
-        self.ops = copy(self.state)
-
     def print(self, n: int) -> None:
         """Prints `n`. Used for operator 104.
         In this overridden method, `self.signal_out` is set.

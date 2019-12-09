@@ -28,11 +28,12 @@ def main() -> None:
     """Processes inputs."""
     # for i in INPUTS:
     #     intcode.Interpreter(i).run_ops()
+
     with open('input', 'r') as f:
         interpreter = intcode.Interpreter(f.read().split(','))
         for index, value in STATE:
             interpreter.store_input(index, value)
-        interpreter.run_ops(silent=True)
+        interpreter.run_ops()
         print(interpreter.ops[0])
 
 

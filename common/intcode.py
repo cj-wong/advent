@@ -101,6 +101,15 @@ class Interpreter:
         self.jump = 0
         self.relative = 0
 
+    def save_state(self) -> None:
+        """Save current state, to restore later."""
+        self.state = copy(self.ops)
+
+    def restore_state(self) -> None:
+        """Restore a copy of state."""
+        self.ops = copy(self.state)
+        self.jump = 0
+
     def slice(self, start: int, end: int) -> List[int]:
         """Slices `self.ops` like how a list can be sliced.
 
