@@ -38,12 +38,21 @@ class Painter(intcode.Interpreter):
         self.direction = 0
         self.inputs = []
 
+    def init_panel(self, color: int) -> None:
+        """Initialize the starting panel with a given `color`.
+        0: black, 1: white
+
+        Args:
+            color (int): the color to use on panel (0, 0)
+        """
+        self.map[(0, 0)] = color
+
     def paint_and_move(self) -> None:
-        """Paint and then move the painter to the new tile."""
+        """Paint and then move the painter to the new panel."""
         if len(self.inputs) == 2:
             color, direction = self.inputs
             self.map[self.coordinates] = color
-            self.direction += 1 if direction == 1 else -1 
+            self.direction += 1 if direction == 1 else -1
             self.direction %= 4
             displacement = self.displacements[self.direction]
             self.coordinates = (
@@ -89,3 +98,23 @@ class Painter(intcode.Interpreter):
 
         """
         self.ops[index] = self.map[self.coordinates]
+
+    def render_map(self) -> None:
+        all_x = [x for x, y in self.map.keys()]
+        min_x = min(all_x)
+        max_x = max(all_x)
+        all_y = [y for x, y in self.map.keys()]
+        min_y = min(all_y)
+        max_y = max(all_y)
+        # Reverse rows to show the image right-side up
+        for y in range(max_y, min_y - 1, -1):
+            print(''.join(
+                [
+                    '.'
+                    if self.map[(x, y)] == 0
+                    else '#'
+                    for x
+                    in range(min_x, max_x + 1)
+                    ]
+                )
+            )
