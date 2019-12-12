@@ -2,6 +2,8 @@ from collections import Counter
 from itertools import zip_longest
 from typing import List, Iterable
 
+import image
+
 
 HEIGHT = 6
 WIDTH = 25
@@ -78,8 +80,7 @@ def main() -> None:
     with open('input', 'r') as f:
         text = f.read().strip()
 
-    layers = convert_to_image(text)
-    composite_image(layers)
+    image.Image(text, HEIGHT, WIDTH).render()
 
 
 if __name__ == '__main__':
