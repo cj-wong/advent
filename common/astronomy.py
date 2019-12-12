@@ -54,3 +54,20 @@ class Moon:
         self.potential = sum([abs(co) for co in self.position])
         self.kinetic = sum([abs(co) for co in self.velocity])
         self.total_energy = self.potential * self.kinetic
+
+
+class Body:
+    """Represents a celestial body with orbits."""
+    def __init__(self, name: str) -> None:
+        """Initialize using a name."""
+        self.name = name
+        self.parent = None
+
+    def add_parent(self, body) -> None:
+        """Add a direct parent `body`.
+
+        Args:
+            body (CelestialBody): the parent body
+
+        """
+        self.parent = body

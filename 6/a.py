@@ -1,5 +1,7 @@
 from typing import List
 
+from astronomy import Body
+
 
 # Orbits: 42
 INPUT = [
@@ -21,24 +23,7 @@ BODIES = {}
 CENTER = 'COM'
 
 
-class CelestialBody:
-    """Represents a celestial body with orbits."""
-    def __init__(self, name: str) -> None:
-        """Initialize using a name."""
-        self.name = name
-        self.parent = None
-
-    def add_parent(self, body) -> None:
-        """Add a direct parent `body`.
-
-        Args:
-            body (CelestialBody): the parent body
-
-        """
-        self.parent = body
-
-
-def initialize_body(body: str) -> CelestialBody:
+def initialize_body(body: str) -> Body:
     """Initializes a celestial `body`. Only does anything
     if `body` is not in `BODIES`.
 
@@ -46,11 +31,11 @@ def initialize_body(body: str) -> CelestialBody:
         body (str): name of the body
 
     Returns:
-        CelestialBody: the represented object
+        Body: the represented object
 
     """
     if body not in BODIES:
-        BODIES[body] = CelestialBody(body)
+        BODIES[body] = Body(body)
     return BODIES[body]
 
 
@@ -69,7 +54,7 @@ def parse_map(orbit_map: List[str]) -> None:
 
     visited = {}
 
-    for _, body in BODIES.items():
+    for body in BODIES.values():
         if body in visited:
             continue
         orbits = 0
@@ -87,10 +72,12 @@ def parse_map(orbit_map: List[str]) -> None:
 
 def main() -> None:
     """Processes inputs."""
+    # parse_map(INPUT)
+    # print('Expected output:', 42)
+
     with open('input', 'r') as f:
         orbit_map = f.read().strip().split('\n')
     parse_map(orbit_map)
-    # parse_map(INPUT)
 
 
 if __name__ == '__main__':
