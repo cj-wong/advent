@@ -12,15 +12,16 @@ class Amplifier(intcode.Interpreter):
     """Represents an amplifier, a specific Intcode interpreter."""
 
     def __init__(
-        self, ops: str, phase: int, silent: bool
+        self, ops: List[int], phase: int, silent: bool = True
         ) -> None:
         """Initialize the amplifier with `phase`, defined in
         the main file to be between PHASE_MIN and PHASE_MAX.
 
         Args:
-            ops (str): Intcode operations
+            ops (List[int]): Intcode operations
             phase (int): the phase setting
-            silent (bool): whether to suppress prints
+            silent (bool, optional): whether to suppress prints;
+                defaults to True
 
         """
         super().__init__(ops, silent=silent)
@@ -38,7 +39,7 @@ class Amplifier(intcode.Interpreter):
 
         """
         self.signal_out = n
-        super().print_at(index)
+        super().print(n)
 
     def print_at(self, index: int) -> None:
         """Print a stored operator/operand at index `index`.
