@@ -1,4 +1,4 @@
-from moon import Moon
+from astronomy import Moon
 
 
 def main() -> None:

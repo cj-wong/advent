@@ -13,6 +13,11 @@ INPUTS = [
         ]
     ]
 
+OUTPUTS = [
+    159,
+    135,
+    ]
+
 INTERSECTINGSET = Set[Tuple[int, int]]
 
 
@@ -53,7 +58,7 @@ def generate_intersections(inputs: List[Tuple[str]]) -> INTERSECTINGSET:
     sets = []
     for it in inputs:
         sets.append(generate_map(it))
-        
+
     return sets[0] & sets[1]
 
 
@@ -97,12 +102,13 @@ def find_shortest(intersections: INTERSECTINGSET) -> None:
 
 def main() -> None:
     """Processes inputs."""
+    # for i, o in zip(INPUTS, OUTPUTS):
+    #     find_shortest(generate_maps(i))
+    #     print('Expected output:', o)
+
     with open('input', 'r') as f:
         i = [t.split(',') for t in f.read().strip().split('\n')]
     find_shortest(generate_intersections(i))
-
-    # for i in INPUTS:
-    #     find_shortest(generate_maps(i))
 
 
 if __name__ == '__main__':

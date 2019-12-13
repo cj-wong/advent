@@ -82,6 +82,7 @@ def main() -> None:
     # for i in INPUTS:
     #     map_asteroids(i)
     #     map_sights()
+    #     print('Expected output:', '(3, 4)')
 
     with open('input', 'r') as f:
         a_map = f.read().strip().split('\n')

@@ -1,7 +1,7 @@
 import math
 from typing import List
 
-from moon import Moon
+from astronomy import Moon
 
 
 def lcm_all(numbers: List[int]) -> int:
@@ -74,6 +74,6 @@ def main() -> None:
 
     print(lcm_all([x, y, z]))
 
-    
+
 if __name__ == '__main__':
     main()

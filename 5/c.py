@@ -25,10 +25,11 @@ INPUTS = [
 
 def main() -> None:
     """Processes inputs."""
-    with open('input', 'r') as f:
-        intcode.Interpreter(f.read().split(',')).run_ops()
     # for i in INPUTS:
     #     intcode.Interpreter(i).run_ops()
+
+    with open('input', 'r') as f:
+        intcode.Interpreter(f.read().split(',')).run_ops()
 
 
 if __name__ == '__main__':

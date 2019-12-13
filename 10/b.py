@@ -33,7 +33,7 @@ def vaporize(ast_map: List[str]) -> None:
     height = len(ast_map)
     width = len(ast_map[0])
     x = X
-    y = Y-1
+    y = Y - 1
     diagonals = [
         (width - X) / -Y,
         (width - X) / (height - Y),
