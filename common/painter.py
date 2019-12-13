@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import List
+from typing import List, Tuple
 
 import intcode
 
@@ -10,7 +10,20 @@ class NoSignalError(ValueError):
 
 
 class Painter(intcode.Interpreter):
-    """Represents a painter, a specific Intcode interpreter."""
+    """Represents a painter, a specific Intcode interpreter.
+
+    Attributes:
+        coordinates (Tuple[int]): (x,y) of the current position
+        direction (int): the current direction:
+            0 = up, 1 = right, 2 = down, 3 = left
+        displacements (List[Tuple[int]]): a list of vector displacements
+            given direction (as the index)
+        inputs (List[int]): a list of inputs that change direction
+            and paint a color
+        map (defaultdict[int]): a pseudo map with coordinates (tuple)
+            as keys and color (int) as values
+
+    """
 
     displacements = [
         (0, 1), #   up
@@ -27,7 +40,6 @@ class Painter(intcode.Interpreter):
 
         Args:
             ops (List[str]): Intcode operations
-            phase (int): the phase setting
             silent (bool, optional): whether to suppress prints;
                 defaults to True
 
@@ -62,8 +74,8 @@ class Painter(intcode.Interpreter):
             self.inputs = []
 
     def print(self, n: int) -> None:
-        """Prints `n`. Used for operator 104.
-        In this overridden method, `self.signal_out` is set.
+        """Prints `n`. Used for operator 104. Additionally,
+        `self.signal_out` is set.
 
         Args:
             n (int): the direct number to print
@@ -74,8 +86,8 @@ class Painter(intcode.Interpreter):
         self.paint_and_move()
 
     def print_at(self, index: int) -> None:
-        """Print a stored operator/operand at index `index`.
-        In this overridden method, `self.signal_out` is set.
+        """Print a stored operator/operand at `index`. Additionally,
+        `self.signal_out` is set.
 
         Args:
             index (int): the index of the operator
@@ -86,9 +98,8 @@ class Painter(intcode.Interpreter):
         self.paint_and_move()
 
     def store_input(self, index: int) -> None:
-        """Store an integer from stdin into index `index`.
-        In this overridden method, input is used given the current
-        coordinates and the map.
+        """Store an input (map value) given the current coordinates
+        and the map.
 
         Args:
             index (int): where the stdin input goes

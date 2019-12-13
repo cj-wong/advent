@@ -8,8 +8,8 @@ def main() -> None:
             f.read().strip().split(','),
             silent=True
             )
-        interpreter.run_ops()
-        interpreter.count_tiles()
+    interpreter.run_ops()
+    interpreter.count_tiles()
 
 
 if __name__ == '__main__':

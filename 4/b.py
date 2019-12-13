@@ -17,8 +17,8 @@ def is_not_descending(digits: List[int]) -> bool:
             False otherwise
 
     """
-    prev = digits[0]
-    for digit in digits[1:]:
+    prev = digits.pop(0)
+    for digit in digits:
         if prev > digit:
             return False
         else:
@@ -40,8 +40,8 @@ def has_adjacent_digits(digits: List[int]) -> bool:
     """
     adj = 0
     ignored = []
-    last = digits[0]
-    for digit in digits[1:]:
+    last = digits.pop(0)
+    for digit in digits:
         if digit in ignored:
             continue
         elif digit == last:

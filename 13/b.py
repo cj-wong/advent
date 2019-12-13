@@ -8,8 +8,8 @@ def main() -> None:
             f.read().strip().split(','),
             silent=True
             )
-        interpreter.insert_quarters()
-        interpreter.run_ops()
+    interpreter.insert_quarters()
+    interpreter.run_ops()
 
 
 if __name__ == '__main__':

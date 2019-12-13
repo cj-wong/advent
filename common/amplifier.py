@@ -31,8 +31,8 @@ class Amplifier(intcode.Interpreter):
         self.jump = 0
 
     def print(self, n: int) -> None:
-        """Prints `n`. Used for operator 104.
-        In this overridden method, `self.signal_out` is set.
+        """Prints `n`. Used for operator 104. Additionally,
+        `self.signal_out` is set.
 
         Args:
             n (int): the direct number to print
@@ -42,8 +42,8 @@ class Amplifier(intcode.Interpreter):
         super().print(n)
 
     def print_at(self, index: int) -> None:
-        """Print a stored operator/operand at index `index`.
-        In this overridden method, `self.signal_out` is set.
+        """Print a stored operator/operand at `index`. Additionally,
+        `self.signal_out` is set.
 
         Args:
             index (int): the index of the operator
@@ -53,9 +53,7 @@ class Amplifier(intcode.Interpreter):
         super().print_at(index)
 
     def store_input(self, index: int) -> None:
-        """Store an integer from stdin into index `index`.
-        In this overridden method, `sys.argv` is absent. Phases
-        are used instead.
+        """Store an input: initially a phase; subsequently, signals.
 
         Args:
             index (int): where the stdin input goes
