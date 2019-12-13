@@ -40,7 +40,14 @@ class Game(painter.Painter):
         """
         if len(self.inputs) == 3:
             x, y, tile = self.inputs
-            self.map[(x, y)] = tile
+            if x == -1 and y == 0 and tile not in self.tiles:
+                print('Current score:', tile)
+            else:
+                if self.tiles[tile] == 'ball':
+                    self.ball = (x, y)
+                elif self.tiles[tile] == 'paddle':
+                    self.paddle = (x, y)
+                self.map[(x, y)] = tile
             self.inputs = []
 
     def count_tiles(self) -> None:
@@ -48,3 +55,23 @@ class Game(painter.Painter):
         values = list(self.map.values())
         for tile, name in self.tiles.items():
             print(name, 'count:', values.count(tile))
+
+    def store_input(self, index: int) -> None:
+        """Store an integer from stdin into index `index`.
+        In this overridden method, input is used given the current
+        coordinates of both the ball and paddle.
+
+        Args:
+            index (int): where the stdin input goes
+
+        Raises:
+            NoSignalError: if no signal was found
+
+        """
+        if self.ball[0] > self.paddle[0]:
+            direction = 1
+        elif self.ball[0] < self.paddle[0]:
+            direction = -1
+        else:
+            direction = 0
+        self.ops[index] = direction
