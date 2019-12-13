@@ -20,13 +20,13 @@ class Painter(intcode.Interpreter):
         ]
 
     def __init__(
-        self, ops: List[int], silent: bool = True
+        self, ops: List[str], silent: bool = True
         ) -> None:
         """Initialize the painter with `phase`, defined in
         the main file to be between PHASE_MIN and PHASE_MAX.
 
         Args:
-            ops (List[int]): Intcode operations
+            ops (List[str]): Intcode operations
             phase (int): the phase setting
             silent (bool, optional): whether to suppress prints;
                 defaults to True
