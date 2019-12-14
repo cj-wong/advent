@@ -1,4 +1,5 @@
 import math
+import sys
 from collections import defaultdict
 from typing import List, Tuple
 
@@ -20,60 +21,87 @@ VAPORIZED = []
 X, Y = (28, 29)
 
 
-def vaporize(ast_map: List[str]) -> None:
-    """Vaporize asteroids. TODO: should not calculate next asteroid
-    by circling around only the perimeter. should account for those in-betweens
-    as well, e.g. 1,30
+LINE_OF_SIGHT = []
+
+
+def map_asteroids(ast_map: List[str]) -> None:
+    """Map asteroids given an `ast_map`.
 
     Args:
         ast_map (List[str]): the asteroid map
 
     """
-    vaporized = 0
-    height = len(ast_map)
-    width = len(ast_map[0])
-    x = X
-    y = Y - 1
-    diagonals = [
-        (width - X) / -Y,
-        (width - X) / (height - Y),
-        -X / (height - Y),
-        X / Y,
-        ]
-    diagonal = 0
-    while True:
-        x0, y0 = Vector(x - X, y - Y).to_tuple()
-        x1 = x0 + X
-        y1 = y0 + Y
-        while x1 in range(width) and y1 in range(height):
-            if ast_map[y1][x1] == '#' and (x1, y1) not in VAPORIZED:
-                VAPORIZED.append((x1, y1))
-                vaporized += 1
-                if vaporized == 200:
-                    print(f'200th: ({x1}, {y1}) {100 * x1 + y1}')
-                    return
+    for y, row in enumerate(ast_map):
+        for x, char in enumerate(row):
+            if char == '#':
+                ASTEROIDS[(x, y)] = '#'
+
+
+def map_sights() -> List[Tuple[int]]:
+    """Map asteroids in sight.
+
+    Returns:
+        List[Tuple[int]]: a list of coordinates of seen asteroids
+
+    """
+    for (x, y) in ASTEROIDS:
+        if x == X and y == Y:
+            continue
+        f = Vector(x - X, y - Y).to_tuple()
+        for line, (x0, y0) in LINE_OF_SIGHT:
+            if line == f:
+                if abs(x) < abs(x0) or abs(y) < abs(y0):
+                    LINE_OF_SIGHT.remove((line, (x0, y0)))
+                    LINE_OF_SIGHT.append((f, (x, y)))
                 break
-            x1 += x0
-            y1 += y0
-        if x == X:
-            if y1 < Y:
-                x += 1
-                diagonal = 0
-            else:
-                x -= 1
-                diagonal = 2
-        elif y == Y:
-            if x1 < X:
-                y -= 1
-                diagonal = 3
-            else:
-                y += 1
-                diagonal = 1
-        else:
-            d = diagonals[diagonal]
-            if 
+        LINE_OF_SIGHT.append((f, (x, y)))
+
+    return [(x, y) for _, (x, y) in LINE_OF_SIGHT]
 
 
+def count_vaporized(n: int, quadrant: List[Tuple[int]]) -> int:
+    """Count vaporized asteroids and if `n` is greater than or equal to
+    200, sort the `quadrant` and output the 200th.
+
+    Args:
+        n (int): the current number of vaporized asteroids
+        quadrant (List[Tuple[int]]): list of coordinates in a quadrant
+
+    Returns:
+        int: `n`, after processing `quadrant`
+
+    """
+    if n >= 200 - len(quadrant):
+        print(
+            sorted(
+                [((x, y), math.atan2(y - Y, x - X)) for (x, y) in quadrant],
+                key=lambda r: r[1],
+                )[199 - n]
+            )
+        sys.exit(0)
+    return n + len(quadrant)
+
+
+def vaporize(seen: List[Tuple[int]]) -> None:
+    """Vaporize seen asteroids.
+
+    Args:
+        seen (List[Tuple[int]]): a list of seen asteroids' coordinates
+
+    """
+    records = []
+    n = 0
+    q1 = [(x, y) for (x, y) in seen if x >= X and y >= Y]
+    n = count_vaporized(n, q1)
+    # Not the mathematical q2. Because the "sweeping" arm rotates
+    # clockwise, the mathematical q4 is the second quadrant to be
+    # reached. Likewise for below q's.
+    q2 = [(x, y) for (x, y) in seen if x >= X and y < Y]
+    n = count_vaporized(n, q2)
+    q3 = [(x, y) for (x, y) in seen if x < X and y < Y]
+    n = count_vaporized(n, q3)
+    q4 = [(x, y) for (x, y) in seen if x < X and y >= Y]
+    n = count_vaporized(n, q4)
 
 
 class Vector:
@@ -118,9 +146,10 @@ def main() -> None:
     with open('input', 'r') as f:
         a_map = f.read().strip().split('\n')
 
-    # map_asteroids(a_map)
-    # map_sights()
-    vaporize(a_map)
+    map_asteroids(a_map)
+    seen = map_sights()
+    #print(len(seen))
+    vaporize(seen)
 
 
 if __name__ == '__main__':
