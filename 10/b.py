@@ -59,13 +59,17 @@ def map_sights() -> List[Tuple[int]]:
     return [(x, y) for _, (x, y) in LINE_OF_SIGHT]
 
 
-def count_vaporized(n: int, quadrant: List[Tuple[int]]) -> int:
+def count_vaporized(
+    n: int, quadrant: List[Tuple[int]], reverse: bool = False
+    ) -> int:
     """Count vaporized asteroids and if `n` is greater than or equal to
     200, sort the `quadrant` and output the 200th.
 
     Args:
         n (int): the current number of vaporized asteroids
         quadrant (List[Tuple[int]]): list of coordinates in a quadrant
+        reverse (bool, optional): whether to reverse sort;
+            defaults to False
 
     Returns:
         int: `n`, after processing `quadrant`
@@ -74,9 +78,14 @@ def count_vaporized(n: int, quadrant: List[Tuple[int]]) -> int:
     if n >= 200 - len(quadrant):
         print(
             sorted(
-                [((x, y), math.atan2(y - Y, x - X)) for (x, y) in quadrant],
+                [
+                    ((x, y), abs(math.atan2(y - Y, x - X)))
+                    for (x, y)
+                    in quadrant
+                    ],
                 key=lambda r: r[1],
-                )[199 - n]
+                reverse=reverse
+                )[199 - n],
             )
         sys.exit(0)
     return n + len(quadrant)
@@ -92,7 +101,7 @@ def vaporize(seen: List[Tuple[int]]) -> None:
     records = []
     n = 0
     q1 = [(x, y) for (x, y) in seen if x >= X and y >= Y]
-    n = count_vaporized(n, q1)
+    n = count_vaporized(n, q1, reverse=True)
     # Not the mathematical q2. Because the "sweeping" arm rotates
     # clockwise, the mathematical q4 is the second quadrant to be
     # reached. Likewise for below q's.
@@ -101,7 +110,7 @@ def vaporize(seen: List[Tuple[int]]) -> None:
     q3 = [(x, y) for (x, y) in seen if x < X and y < Y]
     n = count_vaporized(n, q3)
     q4 = [(x, y) for (x, y) in seen if x < X and y >= Y]
-    n = count_vaporized(n, q4)
+    n = count_vaporized(n, q4, reverse=True)
 
 
 class Vector:
