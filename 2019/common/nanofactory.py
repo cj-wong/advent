@@ -40,6 +40,7 @@ class Nanofactory:
 
         """
         self.chemicals = {}
+        self.coal_outputs = []
         for reaction in reactions:
             ingredients, output = reaction.split(DELIM_IO)
             ingredients = [
@@ -56,6 +57,8 @@ class Nanofactory:
                 in ingredients
                 ]
             out_qty, output = output.split(' ')
+            if ingredients[0][1].name == START:
+                self.coal_outputs.append(output)
             out_qty = int(out_qty)
             if output not in self.chemicals:
                 self.chemicals[output] = Chemical(output)
@@ -65,6 +68,9 @@ class Nanofactory:
 
     def solve(self, qty: int = None, chemical: 'Chemical' = None) -> None:
         """Solve fuel requirements recursively through each child.
+        Until `START` is reached (this is a reverse search), keep
+        recursing.
+
         If no parameters are provided, start with 'FUEL'.
 
         Args:
@@ -79,21 +85,22 @@ class Nanofactory:
             qty = chemical.qty
 
         for c_qty, chem in chemical.requirements:
-            if chem.name == START:
-                self.solution[chemical.name] += qty
-            else:
-                self.solve(c_qty * qty, chem)
+            if chem.name != START:
+                ratio = math.ceil(qty / chemical.qty)
+                min_c_qty = math.ceil(c_qty * ratio)
+                self.solution[chem.name] += min_c_qty
+                self.solve(min_c_qty, chem)
         #return math.ceil(qty / chemical.qty) * ore
 
     def get_ore_solution(self) -> int:
         """Gets 'ORE' given a solved state."""
         fuel = 0
-        for chem, c_qty in self.solution.items():
-            chemical = self.chemicals[chem]
+        for output in self.coal_outputs:
+            chemical = self.chemicals[output]
+            ratio = math.ceil(self.solution[output] / chemical.qty)
             # Because 'ORE' is the only input in a recipe, just take
             # the first (and only) requirement and take its quantity in
             # index 0.
-            ore_qty = chemical.requirements[0][0]
-            fuel += math.ceil(c_qty / chemical.qty) * ore_qty
+            fuel += chemical.requirements[0][0] * ratio
 
         return fuel
