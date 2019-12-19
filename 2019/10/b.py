@@ -37,6 +37,36 @@ def map_asteroids(ast_map: List[str]) -> None:
                 ASTEROIDS[(x, y)] = '#'
 
 
+def is_visible(f: Tuple[int], x: int, y: int) -> bool:
+    """Is the asteroid at (x,y) with a vector f visible?
+    Removes existing asteroid(s) blocked by this one if they both share
+    the same reduced vector.
+
+    Args:
+        f (Tuple[int]): the vector of the asteroid
+        x (int): x-coordinate of the asteroid
+        y (int): y-coordinate of the asteroid
+
+    Returns:
+        bool: True if visible, even if a previously existing asteroid
+            has the same vector but is blocked by the one checked in
+            this function; False otherwise
+
+    """
+    dx = abs(x - X)
+    dy = abs(y - Y)
+    for line, (x0, y0) in LINE_OF_SIGHT:
+        if line == f:
+            dx0 = abs(x0 - X)
+            dy0 = abs(y0 - Y)
+            if dx < dx0 or dy < dy0:
+                LINE_OF_SIGHT.remove((line, (x0, y0)))
+                return True
+            else:
+                return False
+    return True
+
+
 def map_sights() -> List[Tuple[int]]:
     """Map asteroids in sight.
 
@@ -48,13 +78,10 @@ def map_sights() -> List[Tuple[int]]:
         if x == X and y == Y:
             continue
         f = Vector(x - X, y - Y).to_tuple()
-        for line, (x0, y0) in LINE_OF_SIGHT:
-            if line == f:
-                if abs(x) < abs(x0) or abs(y) < abs(y0):
-                    LINE_OF_SIGHT.remove((line, (x0, y0)))
-                    LINE_OF_SIGHT.append((f, (x, y)))
-                break
-        LINE_OF_SIGHT.append((f, (x, y)))
+        result = is_visible(f, x, y)
+
+        if result:
+            LINE_OF_SIGHT.append((f, (x, y)))
 
     return [(x, y) for _, (x, y) in LINE_OF_SIGHT]
 
@@ -76,17 +103,17 @@ def count_vaporized(
 
     """
     if n >= 200 - len(quadrant):
-        print(
-            sorted(
-                [
-                    ((x, y), abs(math.atan2(y - Y, x - X)))
-                    for (x, y)
-                    in quadrant
-                    ],
-                key=lambda r: r[1],
-                reverse=reverse
-                )[199 - n],
-            )
+        results = [
+            ((x, y), abs(math.atan2(y - Y, x - X)))
+            for (x, y)
+            in quadrant
+            ]
+        fx, fy = sorted(
+            results,
+            key=lambda r: r[1],
+            reverse=reverse
+            )[199-n][0]
+        print(fx * 100 + fy)
         sys.exit(0)
     return n + len(quadrant)
 
@@ -100,16 +127,19 @@ def vaporize(seen: List[Tuple[int]]) -> None:
     """
     records = []
     n = 0
-    q1 = [(x, y) for (x, y) in seen if x >= X and y >= Y]
+    # These aren't the same as mathematical quadrants. Because the
+    # "sweeping" arm rotates clockwise, the mathematical q4 is the
+    # second quadrant to be reached. Likewise for below q's.
+    # Furthermore, the y-axis is inverse-order; the "top" is negative
+    # relative to the center.
+    q1 = [(x, y) for (x, y) in seen if x >= X and y < Y]
     n = count_vaporized(n, q1, reverse=True)
-    # Not the mathematical q2. Because the "sweeping" arm rotates
-    # clockwise, the mathematical q4 is the second quadrant to be
-    # reached. Likewise for below q's.
-    q2 = [(x, y) for (x, y) in seen if x >= X and y < Y]
+    # Not the mathematical q2. 
+    q2 = [(x, y) for (x, y) in seen if x >= X and y >= Y]
     n = count_vaporized(n, q2)
-    q3 = [(x, y) for (x, y) in seen if x < X and y < Y]
+    q3 = [(x, y) for (x, y) in seen if x < X and y >= Y]
     n = count_vaporized(n, q3)
-    q4 = [(x, y) for (x, y) in seen if x < X and y >= Y]
+    q4 = [(x, y) for (x, y) in seen if x < X and y < Y]
     n = count_vaporized(n, q4, reverse=True)
 
 
@@ -157,7 +187,6 @@ def main() -> None:
 
     map_asteroids(a_map)
     seen = map_sights()
-    #print(len(seen))
     vaporize(seen)
 
 
