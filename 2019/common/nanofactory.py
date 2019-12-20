@@ -85,9 +85,10 @@ class Nanofactory:
                 that produces 'FUEL'; defaults to 0
 
         """
-        if qty is None and chemical is None:
-            chemical = self.chemicals['FUEL']
-            qty = chemical.product
+        if chemical is None:
+            chemical = self.chemicals[TARGET]
+            qty = chemical.product if qty is None else qty
+            self.excess = defaultdict(int)
         elif chemical.name == START:
             return qty
 
