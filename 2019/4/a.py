@@ -1,8 +1,8 @@
 from typing import List
 
 
-low = 284639
-high = 748759
+LOW = 284639
+HIGH = 748759
 
 
 def is_not_descending(digits: List[int]) -> bool:
@@ -48,9 +48,9 @@ def has_adjacent_digits(digits: List[int]) -> bool:
 
 
 def iterate_range() -> None:
-    """Iterate from `low` to `high` to find the number of valid codes."""
+    """Iterate from `LOW` to `HIGH` to find the number of valid codes."""
     valids = []
-    for i in range(low, high + 1):
+    for i in range(LOW, HIGH + 1):
         l = [int(x) for x in str(i)]
         if is_not_descending(l) and has_adjacent_digits(l):
             valids.append(i)

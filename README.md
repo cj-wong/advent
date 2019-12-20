@@ -11,16 +11,26 @@ These are my solutions for *[Advent of Code][aoc]*, done in Python 3. Currently,
         - `input` - the input file if required
         - `a.py` - first part
         - `b.py` - second part
-        - `c.py` - *see note below*
-    - `common` - *see note below*
+        - `c.py` - `[1]` possible rewrite
+        - `module.py` - `[3]` symbolic link to `../common/module.py`
+    - `common` - `[2]`
+        - `module.py` - `[3]`
 
-Generally after I have implemented a solution, I will try to write the code better, often by implementing a module and class interpretation of the solution. `a.py` and `b.py` are usually rewritten with modules kept in `common` in mind.
+----
+
+`[1]` Generally after I have implemented a solution, I will try to write the code better, often by implementing a module and class interpretation of the solution. `a.py` and `b.py` are usually rewritten with modules kept in `common` in mind.
 
 If the rewrite is universal between both parts, I may create a `c.py` that replaces functionality in both `a.py` and `b.py`. If `c.py` is present, both `a.py` and `b.py` are considered the originals.
 
-The `common` directory is used for modules that may be shared between problems. For example, [`2019/common`](2019/common) contains modules with classes that may be reused, especially [`intcode.py`][intcode]. Necessary modules and theirs dependencies (if applicable) are linked to days that use them.
+`[2]` The `common` directory is used for modules that may be shared between problems. For example, [`2019/common`](2019/common) contains modules with classes that may be reused, especially [`intcode.py`][intcode]. Necessary modules and their dependencies (if applicable) are linked to days that use them.
 
-Depending on the needs of a problem, modules in `common` may either be subclassed (e.g. [`amplifier.py`](2019/common/amplifier.py) contains the first subclassed module of `Interpreter` in [`intcode.py`][intcode]) or grow over time (e.g. more operators added to [`intcode.py`][intcode]). In either case, modules remain backwards-compatible with earlier problems.
+`[3]` Depending on the needs of a problem, modules in `common` may either be subclassed or grow over time. In either case, modules remain backwards-compatible with earlier problems.
+
+An example of a subclassed module:
+- `Amplifier` in [`amplifier.py`](2019/common/amplifier.py) was the first subclassed module of `Interpreter` in [`intcode.py`][intcode]. `Amplifier` contains a different approach to solving a problem but uses the underlying *"Intcode"* interpreter.
+
+An example of a growing module:
+- Initially in [`intcode.py`][intcode], only `1`, `2`, and `99` were valid operators. Now, `1` through `9` inclusive with optional "parameters" and `99` are valid.
 
 ## Completion
 
@@ -28,9 +38,9 @@ Depending on the needs of a problem, modules in `common` may either be subclasse
 
 Day          | Stars
 ------------ | -----
-[1](2018/1)  | 2/2
-[2](2018/2)  | 2/2
-[3](2018/3)  | 1/2
+[1](2018/1)  | 2
+[2](2018/2)  | 2
+[3](2018/3)  | 1
 
 ### [2019](2019)
 

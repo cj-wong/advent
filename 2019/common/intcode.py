@@ -22,9 +22,9 @@ class Operator:
 
     Attributes:
         code (int): the operator code
-        params (List[int]): parameters defined in op, if present
         functions (Dict[int, Callable[..., Any]]): functions associated
             with a given operator code
+        params (List[int]): parameters defined in op, if present
 
     """
     functions = {

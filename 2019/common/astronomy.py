@@ -143,7 +143,8 @@ class Asteroid:
 
         Args:
             a_map (AsteroidField): a map of asteroids
-            target (int): the nth desired target of vaporization
+            target (int, optional): the nth desired target of vaporization;
+                defaults to 200, the target for the Advent problem
 
         """
         records = []
