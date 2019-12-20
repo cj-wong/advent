@@ -1,10 +1,10 @@
-import painter
+import robotics
 
 
 def main() -> None:
     """Processes inputs."""
     with open('input', 'r') as f:
-        interpreter = painter.Painter(
+        interpreter = robotics.Painter(
             f.read().strip().split(','),
             silent=True
             )

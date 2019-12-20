@@ -2,12 +2,12 @@ from collections import defaultdict
 from typing import Dict, List
 
 import intcode
-import painter
+import robotics
 
 
-class Game(painter.Painter):
+class Game(robotics.Painter):
     """Representation of a simple arcade game. Due to its similarities
-    with the `painter.Painter` class, we inherit from that instead of
+    with the `robotics.Painter` class, we inherit from that instead of
     the base `intcode.Interpreter`.
 
     Attributes:
@@ -37,7 +37,7 @@ class Game(painter.Painter):
                 defaults to True
 
         """
-        # Even though we inherit from `painter.Painter`, we do not
+        # Even though we inherit from `robotics.Painter`, we do not
         # actually want to initialize using that. Instead, initialize
         # using the grandparent.
         intcode.Interpreter.__init__(self, ops, silent=silent)
@@ -53,7 +53,7 @@ class Game(painter.Painter):
 
     def draw_tile(self) -> None:
         """Draw a tile according to input. Called by `print` and
-        `print_at` in `painter.Painter`.
+        `print_at` in `robotics.Painter`.
 
         """
         if len(self.inputs) == 3:
