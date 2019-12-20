@@ -58,20 +58,19 @@ OUTPUTS = [
     2210736,
     ]
 
+
 def main() -> None:
     """Processes inputs."""
-    for i, o in zip(INPUTS[-1:], OUTPUTS[-1:]):
-        nf = nanofactory.Nanofactory(i)
-        nf.solve()
-        print(nf.get_ore_solution())
-        print('Expected output:', o)
+    # for i, o in zip(INPUTS, OUTPUTS):
+    #     nf = nanofactory.Nanofactory(i)
+    #     print(nf.solve())
+    #     print('Expected output:', o)
 
-    # with open('input', 'r') as f:
-    #     nf = nanofactory.Nanofactory(
-    #         f.read().strip().split('\n')
-    #         )
-    # nf.solve()
-    # print(nf.get_ore_solution())
+    with open('input', 'r') as f:
+        nf = nanofactory.Nanofactory(
+            f.read().strip().split('\n')
+            )
+    print(nf.solve())
 
 
 if __name__ == '__main__':

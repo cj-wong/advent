@@ -15,18 +15,19 @@ class Chemical:
         self.name = name
 
     def requires(
-        self, qty: int, ingredients: List[Tuple[int, 'Chemical']]
+        self, ingredients: List[Tuple[int, 'Chemical']], product: int
         ) -> None:
-        """The required `ingredients` to create `qty` of itself.
+        """The required `ingredients` to create a quantity of `product`
+        of itself.
 
         Args:
-            qty (int): the quantity produced after converting
+            product (int): the quantity produced after converting
                 ingredients
             ingredients (List[Tuple[int, Chemical]]): ingredient list
 
         """
-        self.requirements = ingredients
-        self.qty = qty
+        self.ingredients = ingredients
+        self.product = product
 
 
 class Nanofactory:
@@ -48,7 +49,7 @@ class Nanofactory:
                 for ingredient
                 in ingredients.split(',')
                 ]
-            for qty, chemical in ingredients:
+            for _, chemical in ingredients:
                 if chemical not in self.chemicals:
                     self.chemicals[chemical] = Chemical(chemical)
             ingredients = [
@@ -62,12 +63,14 @@ class Nanofactory:
             out_qty = int(out_qty)
             if output not in self.chemicals:
                 self.chemicals[output] = Chemical(output)
-            self.chemicals[output].requires(out_qty, ingredients)
+            self.chemicals[output].requires(ingredients, out_qty)
 
-        self.solution = defaultdict(int)
+        self.excess = defaultdict(int)
 
-    def solve(self, qty: int = None, chemical: 'Chemical' = None) -> None:
-        """Solve fuel requirements recursively through each child.
+    def solve(
+        self, qty: int = None, chemical: 'Chemical' = None
+        ) -> None:
+        """Solve fuel.ingredients recursively through each child.
         Until `START` is reached (this is a reverse search), keep
         recursing.
 
@@ -78,29 +81,34 @@ class Nanofactory:
                 chemical; defaults to None
             chemical (Chemical, optional): the current chemical;
                 defaults to None
+            step (int, optional): the current step, with 1 as the step
+                that produces 'FUEL'; defaults to 0
 
         """
         if qty is None and chemical is None:
             chemical = self.chemicals['FUEL']
-            qty = chemical.qty
+            qty = chemical.product
+        elif chemical.name == START:
+            return qty
 
-        for c_qty, chem in chemical.requirements:
-            if chem.name != START:
-                ratio = math.ceil(qty / chemical.qty)
-                min_c_qty = math.ceil(c_qty * ratio)
-                self.solution[chem.name] += min_c_qty
-                self.solve(min_c_qty, chem)
-        #return math.ceil(qty / chemical.qty) * ore
+        if qty <= self.excess[chemical]:
+            self.excess[chemical] -= qty
+            return 0
+        else:
+            qty -= self.excess[chemical]
+            self.excess[chemical] = 0
 
-    def get_ore_solution(self) -> int:
-        """Gets 'ORE' given a solved state."""
-        fuel = 0
-        for output in self.coal_outputs:
-            chemical = self.chemicals[output]
-            ratio = math.ceil(self.solution[output] / chemical.qty)
-            # Because 'ORE' is the only input in a recipe, just take
-            # the first (and only) requirement and take its quantity in
-            # index 0.
-            fuel += chemical.requirements[0][0] * ratio
+        ratio = math.ceil(qty / chemical.product)
+        products = chemical.product * ratio
 
-        return fuel
+        # Add any excess generated. `qty` is guaranteed to be less than
+        # or equal to `products`, so we only check for excess.
+        if qty < products:
+            self.excess[chemical] += products - qty
+
+        ore = 0
+
+        for c_qty, chem in chemical.ingredients:
+            ore += self.solve(c_qty * ratio, chem)
+
+        return ore
