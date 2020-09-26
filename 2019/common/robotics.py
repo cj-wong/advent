@@ -32,9 +32,7 @@ class Painter(intcode.Interpreter):
         (-1, 0), #  left
         ]
 
-    def __init__(
-        self, ops: List[str], silent: bool = True
-        ) -> None:
+    def __init__(self, ops: List[str], silent: bool = True) -> None:
         """Initialize the painter with `phase`, defined in
         the main file to be between PHASE_MIN and PHASE_MAX.
 
@@ -66,11 +64,9 @@ class Painter(intcode.Interpreter):
             self.map[self.coordinates] = color
             self.direction += 1 if direction == 1 else -1
             self.direction %= 4
-            displacement = self.displacements[self.direction]
-            self.coordinates = (
-                self.coordinates[0] + displacement[0],
-                self.coordinates[1] + displacement[1]
-                )
+            x, y = self.coordinates
+            dx, dy = self.displacements[self.direction]
+            self.coordinates = (x + dx, y + dy)
             self.inputs = []
 
     def print(self, n: int) -> None:
@@ -111,6 +107,7 @@ class Painter(intcode.Interpreter):
         self.ops[index] = self.map[self.coordinates]
 
     def render_map(self) -> None:
+        """Render the map as text."""
         all_x = [x for x, y in self.map.keys()]
         min_x = min(all_x)
         max_x = max(all_x)
@@ -129,3 +126,88 @@ class Painter(intcode.Interpreter):
                     ]
                 )
             )
+
+
+class Repairer(Painter):
+    """Represents a repairing robot."""
+    directions = {
+        1: (0, 1),
+        2: (0, -1),
+        3: (-1, 0),
+        4: (1, 0)
+        }
+
+    responses = [0, 1, 2]
+
+    def __init__(self, ops: List[str], silent: bool = True) -> None:
+        """Initialize the painter with `phase`, defined in
+        the main file to be between PHASE_MIN and PHASE_MAX.
+
+        Args:
+            ops (List[str]): Intcode operations
+            silent (bool, optional): whether to suppress prints;
+                defaults to True
+
+        """
+        # Even though we inherit from `Painter`, we do not
+        # actually want to initialize using that. Instead, initialize
+        # using the grandparent.
+        intcode.Interpreter.__init__(self, ops, silent=silent)
+        self.map = defaultdict(int)
+        self.direction = 0
+        self.coordinates = (0, 0)
+        self.inputs = []
+
+    def move(self, response: int) -> None:
+        """Moves the robot, according to the `response` and last
+        direction issued.
+
+        Args:
+            response (int): response as per `responses`
+
+        """
+        x, y = self.coordinates
+        dx, dy = self.directions[self.direction]
+        coordinates = (x + dx, y + dy)
+        if response == 0:
+            self.map[coordinates] = 0
+        elif response == 2:
+
+
+
+    def print(self, n: int) -> None:
+        """Prints `n`. Used for operator 104. Additionally,
+        `self.signal_out` is set.
+
+        Args:
+            n (int): the direct number to print
+
+        """
+        super().print(n)
+        self.move(n)
+
+    def print_at(self, index: int) -> None:
+        """Print a status code after moving.
+
+        Args:
+            index (int): the index of the operator
+
+        """
+        super().print_at(index)
+        self.move(index)
+
+    def store_input(self, index: int) -> None:
+        """Store an input (map value) given the current coordinates
+        and the map.
+
+        Args:
+            index (int): where the stdin input goes
+
+        Raises:
+            NoSignalError: if no signal was found
+
+        """
+        for direction in self.directions:
+            
+        self.ops[index] = 
+        self.direction = 
