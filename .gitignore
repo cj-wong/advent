@@ -8,3 +8,4 @@
 
 # Project-specific files
 test
+**/*.log
