@@ -5,7 +5,9 @@ SUM = 2020
 
 
 def main() -> int:
-    """Read from file and process contents.
+    """Read from file and check for two numbers.
+
+    The two numbers when added together equal SUM (2020).
 
     Returns:
         int: 0 if successful; 1 otherwise
@@ -13,7 +15,7 @@ def main() -> int:
     """
     try:
         with open(sys.argv[1], 'r') as f:
-            file = f.read().split('\n')
+            file = f.read().rstrip().split('\n')
     except IndexError:
         return 1
 
