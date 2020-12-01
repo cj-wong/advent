@@ -2,7 +2,7 @@
 
 ## Overview
 
-These are my solutions for *[Advent of Code][aoc]*, done in Python 3. Currently, I only have **[2019](2019)** available. **[2018](2018)** is incomplete but will be eventually attempted.
+These are my solutions for *[Advent of Code][aoc]*, done in Python 3.
 
 ## Repository Structure
 
