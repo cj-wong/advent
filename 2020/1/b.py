@@ -1,4 +1,4 @@
-import sys
+import config
 
 
 SUM = 2020
@@ -13,19 +13,28 @@ def main() -> int:
         int: 0 if successful; 1 otherwise
 
     """
-    try:
-        with open(sys.argv[1], 'r') as f:
-            file = f.read().rstrip().split('\n')
-    except IndexError:
-        return 1
-
-    for i, line in enumerate(file):
+    test_answer = 241861950
+    file = config.TestFile(test_answer)
+    contents = file.contents
+    for i, line in enumerate(contents):
         num = int(line)
         diff = SUM - num
-        for j, line2 in enumerate(file[i:]):
+        for j, line2 in enumerate(contents[i:]):
             num2 = int(line2)
             diff2 = diff - num2
-            if str(diff2) in file[j:]:
+            if str(diff2) in contents[j:]:
+                file.test(num * num2 * diff2)
+
+    file = config.File()
+    contents = file.contents
+
+    for i, line in enumerate(contents):
+        num = int(line)
+        diff = SUM - num
+        for j, line2 in enumerate(contents[i:]):
+            num2 = int(line2)
+            diff2 = diff - num2
+            if str(diff2) in contents[j:]:
                 print(num * num2 * diff2)
                 return 0
     return 1
