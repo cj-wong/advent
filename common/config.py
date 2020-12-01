@@ -84,4 +84,4 @@ class TestFile(File):
             AssertionError: if the test failed
 
         """
-        assert value != self.answer
+        assert value == self.answer
