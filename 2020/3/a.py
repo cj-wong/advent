@@ -3,6 +3,9 @@ from typing import List
 import config
 
 
+# This file contains the solution for both parts of 2020-12-03.
+
+
 def count_trees(tree_map: List[str], dx: int, dy: int) -> int:
     """Count trees (`#`) in the tree map.
 
@@ -37,7 +40,9 @@ def main() -> None:
     file = config.TestFile(test_answer)
     slopes = [
         (1, 1),
-        # (3, 1),
+        # (3, 1), # This slope is already calculated.
+        # Rather than calculate the count again, just multiply results from
+        # the other slopes onto the existing count.
         (5, 1),
         (7, 1),
         (1, 2),
