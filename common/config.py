@@ -19,7 +19,7 @@ _FH = logging.FileHandler(f'log.log')
 _FH.setLevel(logging.DEBUG)
 
 _CH = logging.StreamHandler()
-_CH.setLevel(logging.WARNING)
+_CH.setLevel(logging.INFO)
 
 FORMATTER = logging.Formatter(
     '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
