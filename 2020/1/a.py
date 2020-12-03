@@ -1,7 +1,25 @@
+from typing import List
+
 import config
 
 
-SUM = 2020
+def search(numbers: List[str]) -> int:
+    """Search for numbers that satisfy `2020 = x + y`.
+
+    Args:
+        numbers (List[str]): a list of numbers in string form
+
+    Returns:
+        int: the product of the number with its complement
+
+    """
+    SUM = 2020
+
+    for number in numbers:
+        num = int(number)
+        diff = SUM - num
+        if str(diff) in numbers:
+            return num * diff
 
 
 def main() -> int:
@@ -15,23 +33,16 @@ def main() -> int:
     """
     test_answer = 514579
     file = config.TestFile(test_answer)
-    contents = file.contents
-    for line in contents:
-        num = int(line)
-        diff = SUM - num
-        if str(diff) in contents:
-            file.test(num * diff)
+    file.test(search(file.contents))
 
     file = config.File()
-    contents = file.contents
-
-    for line in contents:
-        num = int(line)
-        diff = SUM - num
-        if str(diff) in contents:
-            print(num * diff)
-            return 0
-    return 1
+    product = search(file.contents)
+    if product:
+        config.LOGGER.info(product)
+        return 0
+    else:
+        config.LOGGER.error('Could not find matching numbers.')
+        return 1
 
 
 if __name__ == '__main__':

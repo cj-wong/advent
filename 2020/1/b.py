@@ -1,7 +1,33 @@
+from typing import List
+
 import config
 
 
-SUM = 2020
+def search(numbers: List[str]) -> int:
+    """Search for numbers that satisfy `2020 = x + y + z`.
+
+    x = num
+    y = num2
+    z = diff2
+    diff = y + z
+
+    Args:
+        numbers (List[str]): a list of numbers in string form
+
+    Returns:
+        int: the product of the number with its complement
+
+    """
+    SUM = 2020
+
+    for i, number in enumerate(numbers):
+        num = int(number)
+        diff = SUM - num
+        for j, second in enumerate(numbers[i:]):
+            num2 = int(second)
+            diff2 = diff - num2
+            if str(diff2) in numbers[j:]:
+                return num * num2 * diff2
 
 
 def main() -> int:
@@ -15,29 +41,16 @@ def main() -> int:
     """
     test_answer = 241861950
     file = config.TestFile(test_answer)
-    contents = file.contents
-    for i, line in enumerate(contents):
-        num = int(line)
-        diff = SUM - num
-        for j, line2 in enumerate(contents[i:]):
-            num2 = int(line2)
-            diff2 = diff - num2
-            if str(diff2) in contents[j:]:
-                file.test(num * num2 * diff2)
+    file.test(search(file.contents))
 
     file = config.File()
-    contents = file.contents
-
-    for i, line in enumerate(contents):
-        num = int(line)
-        diff = SUM - num
-        for j, line2 in enumerate(contents[i:]):
-            num2 = int(line2)
-            diff2 = diff - num2
-            if str(diff2) in contents[j:]:
-                print(num * num2 * diff2)
-                return 0
-    return 1
+    product = search(file.contents)
+    if product:
+        config.LOGGER.info(product)
+        return 0
+    else:
+        config.LOGGER.error('Could not find matching numbers.')
+        return 1
 
 
 if __name__ == '__main__':
