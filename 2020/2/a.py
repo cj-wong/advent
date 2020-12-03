@@ -42,9 +42,10 @@ def main() -> None:
     # Part A
     file = config.File()
     valid = validate(file.contents, 'a')
-    config.LOGGER.info(f'b: {valid}')
-    valid = validate(file.contents, 'b')
     config.LOGGER.info(f'a: {valid}')
+    # Part B
+    valid = validate(file.contents, 'b')
+    config.LOGGER.info(f'b: {valid}')
 
 
 if __name__ == '__main__':
