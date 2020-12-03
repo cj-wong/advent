@@ -54,10 +54,10 @@ def main() -> None:
     # Part A
     file = config.File()
     count = count_trees(file.contents, 3, 1)
-    config.LOGGER.info(f'A: {count}')
+    config.LOGGER.info(f'a: {count}')
     for slope in slopes:
         count *= count_trees(file.contents, *slope)
-    config.LOGGER.info(f'B: {count}')
+    config.LOGGER.info(f'b: {count}')
 
 
 if __name__ == '__main__':
