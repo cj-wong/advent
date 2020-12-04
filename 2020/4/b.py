@@ -8,6 +8,25 @@ HCL_RE = re.compile(r'^#[0-9a-f]{6}$', re.IGNORECASE)
 PID_RE = re.compile(r'^[0-9]{9}$')
 
 
+def validate_height(unit: str, value: int) -> bool:
+    """Validate the height listed in a passport.
+
+    Args:
+        unit (str): 'cm' or 'in'
+        value (int): the corresponding height in given unit
+
+    Returns:
+        bool: True if the height is acceptable; False otherwise
+
+    """
+    hgt_cm_min = 150
+    hgt_cm_max = 193 + 1
+    hgt_in_min = 59
+    hgt_in_max = 76 + 1
+    return (unit == 'cm' and value in range(hgt_cm_min, hgt_cm_max)
+            or unit == 'in' and value in range(hgt_in_min, hgt_in_max))
+
+
 def validate_params(params: Dict[str, str]) -> bool:
     """Validate the parameters of a passport.
 
@@ -19,8 +38,14 @@ def validate_params(params: Dict[str, str]) -> bool:
 
     """
     byr = int(params['byr'])
+    byr_min = 1920
+    byr_max = 2002 + 1
     iyr = int(params['iyr'])
+    iyr_min = 2010
+    iyr_max = 2020 + 1
     eyr = int(params['eyr'])
+    eyr_min = 2020
+    eyr_max = 2030 + 1
     hgt = params['hgt']
     hgt_unit = hgt[-2:]
     try:
@@ -28,24 +53,14 @@ def validate_params(params: Dict[str, str]) -> bool:
     except ValueError:
         return False
     ecls = ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth']
-    if byr not in range(1920, 2002 + 1):
-        return False
-    elif iyr not in range(2010, 2020 + 1):
-        return False
-    elif eyr not in range(2020, 2030 + 1):
-        return False
-    elif hgt_unit == 'cm' and hgt_val not in range(150, 193 + 1):
-        return False
-    elif hgt_unit == 'in' and hgt_val not in range(59, 76 + 1):
-        return False
-    elif not HCL_RE.match(params['hcl']):
-        return False
-    elif params['ecl'] not in ecls:
-        return False
-    elif not PID_RE.match(params['pid']):
-        return False
-    else:
-        return True
+    return (byr in range(byr_min, byr_max)
+            and iyr in range(iyr_min, iyr_max)
+            and eyr in range(eyr_min, eyr_max)
+            and validate_height(hgt_unit, hgt_val)
+            and HCL_RE.match(params['hcl'])
+            and params['ecl'] in ecls
+            and PID_RE.match(params['pid'])
+            )
 
 
 def validate(passport_list: List[str]) -> int:
@@ -94,7 +109,6 @@ def main() -> None:
     test_answer = 2
     file = config.TestFile(test_answer)
     test = validate(file.contents)
-    print(test)
     file.test(test)
 
     file = config.File()
