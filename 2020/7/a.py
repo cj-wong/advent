@@ -56,8 +56,12 @@ def calculate_all_children() -> BAG_QTY:
         calculate_children(color)
 
 
-def contains_shiny_gold_bag() -> int:
+def contains_colored_bag(color: str = 'shiny gold') -> int:
     """Calculate the number of parent bags containing shiny gold bags.
+
+    Args:
+        color (str, optional): the color bag to specify; defaults to
+            'shiny gold'
 
     Returns:
         int: number of bags that can contain at least one shiny gold bag
@@ -65,25 +69,48 @@ def contains_shiny_gold_bag() -> int:
     """
     count = 0
     for bag, children in BAG_CHILDREN.items():
-        if 'shiny gold' in children:
+        if color in children:
             count += 1
+
+    return count
+
+
+def count_all_children_in_colored_bag(color: str = 'shiny gold') -> int:
+    """Calculate all children within a single shiny gold bag.
+
+    Args:
+        color (str, optional): the color bag to specify; defaults to
+            'shiny gold'
+
+    Returns:
+        int: the number of all iterative children
+
+    """
+    count = 0
+    for children, qty in BAG_CHILDREN[color].items():
+        count += qty
 
     return count
 
 
 def main() -> None:
     """Process bag rules."""
+    # Part A
     test_answer = 4
     file = config.TestFile(test_answer)
     read_rules(file.contents)
     calculate_all_children()
-    test = contains_shiny_gold_bag()
+    test = contains_colored_bag()
     file.test(test)
 
     file = config.File()
     read_rules(file.contents)
     calculate_all_children()
-    result = contains_shiny_gold_bag()
+    result = contains_colored_bag()
+    config.LOGGER.info(result)
+
+    # Part B
+    result = count_all_children_in_colored_bag()
     config.LOGGER.info(result)
 
 
