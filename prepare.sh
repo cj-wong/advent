@@ -17,6 +17,8 @@ DIR="${ROOT}/${1}/${2}"
 mkdir -p "$DIR"
 pushd "$DIR" || (echo "Could not enter directory" && exit 2)
 ln -s ../../common/config.py .
-cp ../../common/a.py .
+if [ ! -e a.py ]; then
+    cp ../../common/a.py .
+fi
 touch test_input.txt
 touch input.txt
