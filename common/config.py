@@ -56,6 +56,15 @@ class File:
             LOGGER.error(e)
             raise e
 
+    def contents_to_type(self, to_type: type) -> None:
+        """Convert self.contents to a type.
+
+        Args:
+            to_type (type): the desired end type of each list element
+
+        """
+        self.contents = [to_type(content) for content in self.contents]
+
 
 class TestFile(File):
     """Read a test file."""
