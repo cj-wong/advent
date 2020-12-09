@@ -31,6 +31,17 @@ LOGGER.addHandler(_FH)
 LOGGER.addHandler(_CH)
 
 
+def log_part_info(part: str, answer: Any) -> None:
+    """Log the part of problem and answer as info.
+
+    Args:
+        part (str): either 'A' or 'B'
+        answer (Any): anything that can be coerced to str
+
+    """
+    LOGGER.info(f'{part}: {answer}')
+
+
 class File:
     """Read file into class.
 

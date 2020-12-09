@@ -84,11 +84,11 @@ def main() -> None:
     file = config.File()
     file.contents_to_type(int)
     result = check_data_for_invalid(file.contents)
-    config.LOGGER.info(f'A: {result}')
+    config.log_part_info('A', result)
     # Part B
     result = get_range_sums_to_invalid(file.contents, result)
     result = min(result) + max(result)
-    config.LOGGER.info(f'B: {result}')
+    config.log_part_info('B', result)
 
 
 if __name__ == '__main__':

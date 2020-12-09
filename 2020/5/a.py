@@ -105,11 +105,11 @@ def main() -> None:
 
     file = config.File()
     result = boarding_pass_to_data(file.contents)
-    config.LOGGER.info(f'A: {get_highest_seat_id(result)}')
+    config.log_part_info('A', get_highest_seat_id(result))
 
     # Part B
     result = find_empty_seat_id(result)
-    config.LOGGER.info(f'B: {result}')
+    config.log_part_info('B', result)
 
 
 if __name__ == '__main__':

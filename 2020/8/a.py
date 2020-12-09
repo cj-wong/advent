@@ -98,7 +98,7 @@ def main() -> None:
 
     file = config.File()
     result = iterate_instructions_once(file.contents)
-    config.LOGGER.info(f'A: {result}')
+    config.log_part_info('A', result)
 
     # Part B
     test_answer = 8
@@ -108,7 +108,7 @@ def main() -> None:
 
     file = config.File()
     result = replace_bad_op(file.contents)
-    config.LOGGER.info(f'B: {result}')
+    config.log_part_info('B', result)
 
 
 if __name__ == '__main__':
