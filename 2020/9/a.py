@@ -56,21 +56,39 @@ def get_range_sums_to_invalid(data: List[int], invalid: int) -> List[int]:
         List[int]: the range of integers
 
     """
-    pass
+    for i, datum in enumerate(data):
+        s = [datum]
+        while sum(s) < invalid:
+            i += 1
+            s.append(data[i])
+
+        if sum(s) == invalid:
+            return s
 
 
 def main() -> None:
     """Process port data."""
+    # Part A
     test_answer = 127
     file = config.TestFile(test_answer)
     file.contents_to_type(int)
     test = check_data_for_invalid(file.contents, preamble_size=5)
     file.test(test)
+    # Part B
+    file.answer = 62
+    test = get_range_sums_to_invalid(file.contents, test)
+    test = min(test) + max(test)
+    file.test(test)
 
+    # Part A
     file = config.File()
     file.contents_to_type(int)
     result = check_data_for_invalid(file.contents)
-    config.LOGGER.info(result)
+    config.LOGGER.info(f'A: {result}')
+    # Part B
+    result = get_range_sums_to_invalid(file.contents, result)
+    result = min(result) + max(result)
+    config.LOGGER.info(f'B: {result}')
 
 
 if __name__ == '__main__':
