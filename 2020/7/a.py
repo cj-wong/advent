@@ -12,7 +12,12 @@ RULES = {}
 
 
 def read_rules(rules: List[str]) -> None:
-    """Read the rule into BAG_CHILDREN."""
+    """Read the rule into BAG_CHILDREN.
+
+    Args:
+        rules (List[str]): a list of rules for bags
+
+    """
     for rule in rules:
         bag, children = rule[:-1].split(' contain ')
         color = BAG_RE.match(bag).group(1)
@@ -28,30 +33,28 @@ def read_rules(rules: List[str]) -> None:
                 pass
 
 
-def calculate_children(color: str) -> BAG_QTY:
-    """Calculate children bags of a bag with the specified color."""
+def calculate_children(color: str) -> None:
+    """Calculate children bags of a bag with the specified color.
+
+    Args:
+        color (str): color of the bag to calculate children
+
+    """
     children = defaultdict(int)
     for child_color, child_qty in RULES[color].items():
-        while True:
-            try:
-                for cc_color, cc_qty in BAG_CHILDREN[child_color].items():
-                    total_c_qty = cc_qty * child_qty
-                    children[cc_color] += total_c_qty
-                children[child_color] += child_qty
-                break
-            except KeyError:
-                calculate_children(child_color)
+        if child_color not in BAG_CHILDREN:
+            calculate_children(child_color)
+
+        for cc_color, cc_qty in BAG_CHILDREN[child_color].items():
+            total_c_qty = cc_qty * child_qty
+            children[cc_color] += total_c_qty
+        children[child_color] += child_qty
 
     BAG_CHILDREN[color] = children
 
 
-def calculate_all_children() -> BAG_QTY:
-    """Calculate all children of every bag.
-
-    Returns:
-        BAG_QTY: the quantity of all children of this bag
-
-    """
+def calculate_all_children() -> None:
+    """Calculate all children of every bag."""
     for color in RULES:
         calculate_children(color)
 
