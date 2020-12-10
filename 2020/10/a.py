@@ -30,19 +30,17 @@ def calculate_diff_occurrence(joltages: List[int]) -> int:
 def main() -> None:
     """Check joltages of the adapters from the outlet to device."""
     test_answer = 35
-    file = config.TestFile(test_answer)
-    file.contents_to_type(int)
+    file = config.TestFile(test_answer, to_type=int)
     test = calculate_diff_occurrence(file.contents)
     file.test(test)
 
     test_answer = 220
-    file = config.TestFile(test_answer, path="another_test_input.txt")
-    file.contents_to_type(int)
+    file = config.TestFile(
+        test_answer, path="another_test_input.txt", to_type=int)
     test = calculate_diff_occurrence(file.contents)
     file.test(test)
 
-    file = config.File()
-    file.contents_to_type(int)
+    file = config.File(to_type=int)
     result = calculate_diff_occurrence(file.contents)
     config.LOGGER.info(result)
 
