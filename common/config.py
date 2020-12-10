@@ -47,52 +47,70 @@ class File:
 
     Attributes:
         contents (List[str]): a list of strings from a file
+        path (str): path to the file
 
     """
 
-    def __init__(self, path: str = "input.txt") -> None:
+    def __init__(
+            self, path: str = "input.txt", to_type: type = None,
+            sort: bool = False
+            ) -> None:
         """Initialize the file.
 
         Args:
-            path (str): the path to the file
+            path (str, optional): the path to the file; defaults to
+                "input.txt"
+            to_type (type, optional): the type to convert contents;
+                defaults to None
+            sort (bool, optional): whether to sort the contents; defaults to
+                False
 
         Raises:
             FileNotFoundError: if the file at `path` is invalid
 
         """
         try:
+            self.path = path
             with open(path, 'r') as file:
                 self.contents = file.read().rstrip().split('\n')
+            if to_type:
+                self.contents = [to_type(content) for content in self.contents]
+            if sort:
+                self.contents = sorted(self.contents)
         except FileNotFoundError as e:
             LOGGER.error(e)
             raise e
 
-    def contents_to_type(self, to_type: type) -> None:
-        """Convert self.contents to a type.
-
-        Args:
-            to_type (type): the desired end type of each list element
-
-        """
-        self.contents = [to_type(content) for content in self.contents]
+    def write_to_file(self) -> None:
+        """Write the contents to a file."""
+        with open(f'{self.path}.txt', 'w') as f:
+            f.write('\n'.join([str(content) for content in self.contents]))
 
 
 class TestFile(File):
     """Read a test file."""
 
-    def __init__(self, answer: Any, path: str = "test_input.txt") -> None:
+    def __init__(
+            self, answer: Any, path: str = "test_input.txt",
+            to_type: type = None, sort: bool = False
+            ) -> None:
         """Initialize the file.
 
         Args:
             answer (Any): the answer for the file to check against
-            path (str, optional): the path to the file; defaults
+            path (str, optional): the path to the file; defaults to
+                "test_input.txt"
+            to_type (type, optional): the type to convert contents;
+                defaults to None
+            sort (bool, optional): whether to sort the contents; defaults to
+                False
 
         Raises:
             FileNotFoundError: if the file at `path` is invalid
 
         """
         self.answer = answer
-        super().__init__(path)
+        super().__init__(path, to_type, sort)
 
     def test(self, value: Any) -> None:
         """Test whether value matches the intended answer.
