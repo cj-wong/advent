@@ -3,16 +3,19 @@ from typing import List
 import config
 
 
-def calculate_diff_occurrence(joltages: List[str]) -> None:
+def calculate_diff_occurrence(joltages: List[int]) -> int:
     """Calculate diff occurrences for differences of 1 and 3.
 
     Args:
-        joltages (List[str]): the joltages of the adapters on hand
+        joltages (List[int]): the joltages of the adapters on hand
+
+    Returns:
+        int: the product of numbers of diff of 1 and diff of 3
 
     """
-    device_joltage = max(joltages) + 3
     lowest = 1
     highest = 3
+    device_joltage = max(joltages) + highest
     # Add both the starting (outlet) and ending (device) joltages.
     joltages.append(0)
     joltages.append(device_joltage)
