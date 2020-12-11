@@ -37,7 +37,7 @@ An example of a subclassed module:
 An example of a growing module:
 - Initially in [intcode.py], only `1`, `2`, and `99` were valid operators. Now, `1` through `9` inclusive with optional "parameters" and `99` are valid.
 
-<a id="note-4">\[4\]</a> [config.py] is a general purpose utility module to be imported by solutions. It primarily features a file opener (and a subclass test file opener). The test file opener can also test input against the known answer (supplied in a prompt's description). Rather than manually create files, simply use the module. Use the [bare](common/a.py) file as a reference.
+<a id="note-4">\[4\]</a> [config.py] is a general purpose utility module to be imported by solutions. It primarily features a file opener (and a subclass test file opener). The test file opener can also test input against the known answer (supplied in a prompt's description). Rather than manually create files, simply use the module. Use the [bare](common/a.py) file as a reference. [^](#repository-structure)
 
 ## Completion
 

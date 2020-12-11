@@ -66,11 +66,11 @@ def find_non_overlapping_claim(fabric: FABRIC) -> int:
             if (x, y) in CLAIM_CORNERS:
                 claim_id = CLAIM_CORNERS[(x, y)]
                 w, h = CLAIM_DIMENS[claim_id]
-                if not check_overlap(fabric, x, y, w, h):
+                if not is_overlapping(fabric, x, y, w, h):
                     return claim_id
 
 
-def check_overlap(fabric: FABRIC, x: int, y: int, w: int, h: int) -> bool:
+def is_overlapping(fabric: FABRIC, x: int, y: int, w: int, h: int) -> bool:
     """Check whether a claim overlaps anywhere.
 
     Overlaps are wherever any spaces are greater than 1.
