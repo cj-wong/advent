@@ -9,10 +9,18 @@
 if [[ -z "$1" || -z "$2" ]]; then
     echo "Usage: prepare.sh <year> <day>"
     exit 1
+elif [[ "$2" == "latest" ]]; then
+    last=$(find "$1" -mindepth 1 -maxdepth 1 -type d \
+        | cut --delimiter=/ --fields=2 \
+        | sort -n \
+        | tail -n 1)
+    day=$(echo "${last} + 1" | bc )
+else
+    day="$2"
 fi
 
 ROOT=$(dirname "$0")
-DIR="${ROOT}/${1}/${2}"
+DIR="${ROOT}/${1}/${day}"
 
 mkdir -p "$DIR"
 pushd "$DIR" || (echo "Could not enter directory" && exit 2)
