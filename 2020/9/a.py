@@ -70,8 +70,7 @@ def main() -> None:
     """Process port data."""
     # Part A
     test_answer = 127
-    file = config.TestFile(test_answer)
-    file.contents_to_type(int)
+    file = config.TestFile(test_answer, to_type=int)
     test = check_data_for_invalid(file.contents, preamble_size=5)
     file.test(test)
     # Part B
@@ -81,8 +80,7 @@ def main() -> None:
     file.test(test)
 
     # Part A
-    file = config.File()
-    file.contents_to_type(int)
+    file = config.File(to_type=int)
     result = check_data_for_invalid(file.contents)
     config.log_part_info('A', result)
     # Part B
