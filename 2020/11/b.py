@@ -8,11 +8,14 @@ EMPTY = 'L'
 FLOOR = '.'
 
 
-def simulate_seating(rows: List[str]) -> None:
+def simulate_seating(rows: List[str]) -> int:
     """Simulate seating on the ferry.
 
     Args:
         rows (List[str]): rows of seats
+
+    Returns:
+        int: number of occupied seats
 
     """
     rows = [
@@ -23,45 +26,52 @@ def simulate_seating(rows: List[str]) -> None:
     row_len = len(rows[0])
     col_len = len(rows)
 
-    states = [rows]
+    last = rows
 
     while True:
         state = [[FLOOR for _ in range(row_len)] for _ in range(col_len)]
-        previous_rows = states[-1]
-        for y, row in enumerate(previous_rows):
+        for y, row in enumerate(last):
             for x, seat in enumerate(row):
                 occupied = 0
                 for dy in [-1, 0, 1]:
                     for dx in [-1, 0, 1]:
+                        # Skip when both dy and dx are 0: the offsets that
+                        # just point to the current seat
                         if dy == 0 and dx == 0:
                             continue
 
                         try:
-                            if (x == 0 and dx == -1) or (y == 0 and dy == -1):
-                                raise IndexError
-                            c = 1
-                            while (previous_rows[y + c * dy][x + c * dx]
-                                   == FLOOR):
-                                c += 1
-                            if (y + c * dy) < 0 or (x + c * dx) < 0:
-                                raise IndexError
-                            if (previous_rows[y + c * dy][x + c * dx]
-                                    == OCCUPIED):
+                            cy = y
+                            cx = x
+                            while True:
+                                cy += dy
+                                cx += dx
+                                # Because negative indices (within bounds) are
+                                # possible in Python, they must be checked if
+                                # negative (invalid index).
+                                if cy < 0 or cx < 0:
+                                    raise IndexError
+                                if last[cy][cx] == FLOOR:
+                                    continue
+                                else:
+                                    break
+                            if last[cy][cx] == OCCUPIED:
                                 occupied += 1
+
                         except IndexError:
                             pass
 
-                if previous_rows[y][x] == OCCUPIED and occupied >= 5:
+                if last[y][x] == OCCUPIED and occupied >= 5:
                     state[y][x] = EMPTY
-                elif previous_rows[y][x] == EMPTY and occupied == 0:
+                elif last[y][x] == EMPTY and occupied == 0:
                     state[y][x] = OCCUPIED
                 else:
-                    state[y][x] = previous_rows[y][x]
+                    state[y][x] = last[y][x]
 
-        if state == previous_rows:
+        if state == last:
             return sum([row.count(OCCUPIED) for row in state])
 
-        states.append(state)
+        last = state
 
 
 def main() -> None:
