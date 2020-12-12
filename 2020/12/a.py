@@ -27,15 +27,9 @@ def manhattan_distance(directions: List[str]) -> int:
         distance = int(distance)
 
         if facing == 'F':
-            if last_direction == 'N':
-                y += distance
-            elif last_direction == 'S':
-                y -= distance
-            elif last_direction == 'E':
-                x += distance
-            else:
-                x -= distance
-        elif facing in 'RL':
+            facing = last_direction
+
+        if facing in 'RL':
             if facing == 'L':
                 c = -1
             else:
@@ -54,7 +48,6 @@ def manhattan_distance(directions: List[str]) -> int:
             else:
                 x -= distance
 
-    print(x, y)
     return abs(x) + abs(y)
 
 
