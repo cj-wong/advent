@@ -38,30 +38,37 @@ def find_contest_pattern(bus_lines: List[str]) -> int:
         bus_lines (List[str]): the bus lines
 
     """
-    buses = [int(bus) for bus in bus_lines[1].split(',') if bus != 'x']
+    buses = [int(bus) if bus != 'x' else 1 for bus in bus_lines[1].split(',')]
     lower = max(buses)
     upper = lcm(*buses) // buses[0]
     for i in range(lower, upper):
         minimum = i * buses[0]
-        r = [ceil(minimum / bus) * bus for bus in buses[1:]]
-        if r == sorted(r) and len(set(r)) == len(buses[1:]):
+        r = [(minimum + j) % bus for j, bus in enumerate(buses[1:], start=1)]
+        if len(set(r)) == 1:
             return minimum
 
 
 def main() -> None:
     """Confirm the bus schedule."""
+    # Part A
     test_answer = 295 # bus 59 * 5 minutes
     file = config.TestFile(test_answer)
     test = find_soonest_bus(file.contents)
     file.test(test)
 
-    file.answer = 1068788
+    # Part B
+    file.answer = 1068781
     test = find_contest_pattern(file.contents)
     file.test(test)
 
+    # Part A
     file = config.File()
     result = find_soonest_bus(file.contents)
-    config.LOGGER.info(result)
+    config.log_part_info('A', result)
+
+    # Part B
+    result = find_contest_pattern(file.contents)
+    config.log_part_info('B', result)
 
 
 if __name__ == '__main__':
