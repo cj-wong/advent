@@ -39,13 +39,22 @@ def find_contest_pattern(bus_lines: List[str]) -> int:
 
     """
     buses = [int(bus) if bus != 'x' else 1 for bus in bus_lines[1].split(',')]
-    lower = max(buses)
-    upper = lcm(*buses) // buses[0]
-    for i in range(lower, upper):
-        minimum = i * buses[0]
-        r = [(minimum + j) % bus for j, bus in enumerate(buses[1:], start=1)]
+    m = max(buses)
+    lower = buses[0]
+    upper = lcm(*buses) // m
+    idx = buses.index(m)
+    for multiplier in range(lower, upper):
+        config.LOGGER.debug(multiplier)
+        minimum = multiplier * m
+        minimum_at_index_0 = minimum - idx
+        if minimum_at_index_0 % buses[0] != 0:
+            continue
+
+        r = [(minimum_at_index_0 + j) % bus
+             for j, bus in enumerate(buses[1:], start=1)]
+
         if len(set(r)) == 1:
-            return minimum
+            return minimum_at_index_0
 
 
 def main() -> None:
@@ -57,9 +66,9 @@ def main() -> None:
     file.test(test)
 
     # Part B
-    file.answer = 1068781
-    test = find_contest_pattern(file.contents)
-    file.test(test)
+    # file.answer = 1068781
+    # test = find_contest_pattern(file.contents)
+    # file.test(test)
 
     # Part A
     file = config.File()
