@@ -8,15 +8,16 @@ import config
 
 MEM_RE = re.compile(r'mem\[([0-9]+)\] = ([0-9]+)')
 
+BINS = List[int]
 
-def remove_leading_zeroes(mask: List[int]) -> List[int]:
+def remove_leading_zeroes(mask: BINS) -> BINS:
     """Remove leading zeroes from a mask.
 
     Args:
-        mask (List[int]): a zero- or one-only mask
+        mask (BINS): a zero- or one-only mask
 
     Returns:
-        List[int]: the mask, but with leading zeroes removed
+        BINS: the mask, but with leading zeroes removed
 
     """
     for i, b in enumerate(mask):
@@ -24,36 +25,35 @@ def remove_leading_zeroes(mask: List[int]) -> List[int]:
             return mask[i:]
 
 
-def add_leading_zeroes(value: List[int], n: int) -> List[int]:
+def add_leading_zeroes(value: BINS, n: int) -> BINS:
     """Add padding leading zeroes to a value to be written to memory.
 
     Args:
-        value (List[int]): the value to write to memory as a list of binary
+        value (BINS): the value to write to memory as a list of binary
         n (int): number of zeroes to pad
 
     Returns:
-        List[int]: the same value, but with appropriate leading zeroes
+        BINS: the same value, but with appropriate leading zeroes
 
     """
     return [0] * n + value
 
 
-def mask_values(mask: List[int], value: List[int], mask_n: int) -> List[int]:
+def mask_values(mask: BINS, value: BINS, mask_n: int) -> BINS:
     """Mask values in reverse order (from least significant to most).
 
     Args:
-        mask (List[int]): the mask
-        value (List[int]): the value to mask
+        mask (BINS): the mask
+        value (BINS): the value to mask
         mask_n (int): the value to mask over value
 
     Returns:
-        List[int]: value, but masked
+        BINS: value, but masked
 
     """
     value = [
         mask_n if m == 1 else v
-        for addr, (m, v) in enumerate(
-            zip_longest(mask[::-1], value[::-1]))
+        for m, v in zip_longest(mask[::-1], value[::-1])
         ]
     return value[::-1]
 
