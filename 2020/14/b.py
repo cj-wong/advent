@@ -83,32 +83,11 @@ def mask_floating(floating_mask: BINS, address: BINS) -> List[BINS]:
             continue
         count += 1
         for group_n, subindices in enumerate(
-                grouper(indices, len(indices) // (count * 2))):
+                grouper(indices, len(indices) // (2 ** count))):
             for subindex in subindices:
                 addresses[subindex][-index - 1] = group_n % 2
 
     return addresses
-
-
-def max_multliple(*lists: List[BINS]) -> int:
-    """Find the maximum length of multiple lists.
-
-    Args:
-        *lists (List[BINS]): a list of lists of binary numbers
-
-    Returns:
-        int: the longest list's length
-
-    """
-    m = 0
-    for l in lists:
-        try:
-            if len(l) > m:
-                m = len(l)
-        except TypeError:
-            pass
-
-    return m
 
 
 def read_program_data(program: List[str]) -> int:
@@ -147,14 +126,11 @@ def read_program_data(program: List[str]) -> int:
             except TypeError:
                 pass
 
-            try:
-                if 1 in floating:
-                    addresses = mask_floating(floating, address)
-            except TypeError:
-                addresses = [address]
+            if 1 in floating:
+                addresses = mask_floating(floating, address)
 
             for address in addresses:
-                address = ''.join([str(a) for a in address])
+                address = int(''.join([str(a) for a in address]), base=2)
                 memory[address] = value
 
     return sum(memory.values())
