@@ -122,4 +122,13 @@ class TestFile(File):
             AssertionError: if the test failed
 
         """
-        assert value == self.answer
+        try:
+            assert value == self.answer
+        except AssertionError as e:
+            LOGGER.error(
+                f'Your answer: {value} (type: {type(value)})'
+                )
+            LOGGER.error(
+                f'Test answer: {self.answer} (type: {type(self.answer)})'
+                )
+            raise e
